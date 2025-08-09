@@ -13,7 +13,6 @@ import { useUser } from "@/hooks/use-user"
 import {
   User,
   Users,
-  Settings,
   LogOut,
   Lightbulb,
   BookOpen,
@@ -31,7 +30,6 @@ import {
   FileText,
   Globe,
   Plus,
-  Settings as SettingsIcon, // Alias to avoid conflict if Settings is used elsewhere
   User as UserIcon,
 } from "lucide-react"
 
@@ -1167,7 +1165,8 @@ export default function EduMindAI() {
                     </Link>
                     <Link href="/settings">
                       <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer">
-                        <SettingsIcon className="w-4 h-4" />
+                        {/* Removed SettingsIcon import */}
+                        {/* <SettingsIcon className="w-4 h-4" /> */}
                         Settings
                       </div>
                     </Link>
