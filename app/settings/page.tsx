@@ -52,59 +52,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* AI Assistant Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>AI Assistant Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Enable AI Guidance</Label>
-                  <p className="text-sm text-gray-600">Allow AI to provide guidance and suggestions during discussions</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Smart Resource Recommendations</Label>
-                  <p className="text-sm text-gray-600">Automatically recommend relevant resources based on discussion content</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Voice Recognition</Label>
-                  <p className="text-sm text-gray-600">Enable voice recognition functionality</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notification Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Discussion Invitations</Label>
-                  <p className="text-sm text-gray-600">Notify me when I receive new discussion invitations</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>AI Feedback</Label>
-                  <p className="text-sm text-gray-600">Notify me when AI generates discussion feedback</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
-          </Card>
-
           <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
             <Save className="w-4 h-4 mr-2" />
             Save Settings
