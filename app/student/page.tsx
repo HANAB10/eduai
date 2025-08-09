@@ -1148,6 +1148,8 @@ export default function EduMindAI() {
 
   const beginCalibration = async () => {
     try {
+      console.log('Starting voice calibration...')
+
       const result = await startCalibration()
       if (result?.success) {
         console.log('语音校准成功:', result)
@@ -2028,7 +2030,7 @@ export default function EduMindAI() {
               {calibrationError && (
                 <div className="text-red-500 text-sm text-center">{calibrationError}</div>
               )}
-              
+
               {calibrationCompleteHook && (
                 <div className="text-green-600 text-sm text-center">
                   ✅ 语音校准成功！识别内容: {recognizedSentence}

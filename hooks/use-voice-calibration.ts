@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useRef } from 'react'
@@ -18,17 +17,17 @@ export function useVoiceCalibration() {
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState(0)
   const [recognizedSentence, setRecognizedSentence] = useState<string>('')
-  
+
   const { user } = useUser()
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
-  
+
   const startCalibration = async (): Promise<VoiceCalibrationResult | null> => {
     if (!user) {
       setError('用户信息未找到')
       return null
     }
-    
+
     const userId = user.id
     const userName = `${user.first_name} ${user.last_name}`
     try {
@@ -37,15 +36,24 @@ export function useVoiceCalibration() {
       setCountdown(10)
       audioChunksRef.current = []
 
+      // 检查浏览器是否支持 getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('您的浏览器不支持麦克风访问，请使用最新版本的 Chrome、Firefox 或 Safari')
+      }
+
+      console.log('Requesting microphone permission...')
+
       // 获取麦克风权限
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           sampleRate: 16000,
           channelCount: 1,
           echoCancellation: true,
           noiseSuppression: true
-        } 
+        }
       })
+
+      console.log('Microphone access granted, starting calibration...')
 
       // 创建录音器
       const mediaRecorder = new MediaRecorder(stream, {
@@ -66,7 +74,7 @@ export function useVoiceCalibration() {
 
           // 合并音频数据
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-          
+
           // 发送到后端进行处理
           const formData = new FormData()
           formData.append('audio', audioBlob)
