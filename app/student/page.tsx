@@ -31,6 +31,7 @@ import {
   Globe,
   Plus,
   User as UserIcon,
+  Square, // Added for Stop Discussion button
 } from "lucide-react"
 
 interface Discussion {
@@ -208,7 +209,7 @@ export default function EduMindAI() {
   const recognitionRef = useRef<any>(null)
   const [isVoiceCalibrating, setIsVoiceCalibrating] = useState(false)
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
-  const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false)
+  const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const [memberSpeakingTimes, setMemberSpeakingTimes] = useState<Record<string, number>>({
     Alice: 0,
     Bob: 0,
@@ -923,6 +924,18 @@ export default function EduMindAI() {
     if (content.includes("why") || content.includes("how")) score += 0.5
 
     return Math.min(Math.round(score), 5)
+  }
+
+  const toggleDiscussion = () => {
+    if (!isDiscussionActive) {
+      startDiscussion()
+    } else {
+      setIsDiscussionActive(false)
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+      setIsListening(false)
+    }
   }
 
   const startDiscussion = () => {
