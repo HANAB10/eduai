@@ -1163,13 +1163,6 @@ export default function EduMindAI() {
                         Profile
                       </div>
                     </Link>
-                    <Link href="/settings">
-                      <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer">
-                        {/* Removed SettingsIcon import */}
-                        {/* <SettingsIcon className="w-4 h-4" /> */}
-                        Settings
-                      </div>
-                    </Link>
                     <div className="border-t border-gray-200 my-2"></div>
                     <div
                       className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer"
