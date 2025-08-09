@@ -1,0 +1,35 @@
+# =======================
+# Dependencies
+# =======================
+node_modules/
+.npm/
+pnpm-store/
+.yarn/
+.yarn-cache/
+
+# =======================
+# Next.js build output
+# =======================
+.next/
+out/
+dist/
+build/
+
+# =======================
+# Replit build artifacts
+# =======================
+*.pack.gz
+*.pack
+replit.nix.result/
+
+# =======================
+# Logs & misc
+# =======================
+*.log
+.DS_Store
+
+# =======================
+# Environment variables
+# =======================
+.env
+.env.*

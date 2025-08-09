@@ -1,0 +1,22 @@
+Error: ./app/staffregister/page.tsx
+Error:   [31m×[0m The "use client" directive must be placed before other expressions. Move it to the top of the file to resolve this issue.
+     ╭─[[36;1;4m/home/runner/workspace/app/staffregister/page.tsx[0m:188:1]
+ [2m185[0m │     </div>
+ [2m186[0m │   )
+ [2m187[0m │ }
+ [2m188[0m │ "use client"
+     · [35;1m────────────[0m
+ [2m189[0m │ 
+ [2m190[0m │ import { useState } from "react"
+ [2m191[0m │ import { useRouter } from "next/navigation"
+     ╰────
+    at tr (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:552:164430)
+    at o6 (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:62116)
+    at iP (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:81700)
+    at i$ (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:92800)
+    at sv (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:125399)
+    at eval (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:125244)
+    at sm (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:125252)
+    at sa (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:121554)
+    at sZ (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:143648)
+    at MessagePort._ (webpack-internal:///(pages-dir-browser)/./node_modules/.pnpm/next@15.4.5_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-devtools/index.js:541:196942)
