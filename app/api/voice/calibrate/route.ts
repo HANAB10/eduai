@@ -13,12 +13,15 @@ export async function POST(request: NextRequest) {
     const userId = formData.get('userId') as string
     const userName = formData.get('userName') as string
 
-    if (!audioFile || !userId) {
-      return NextResponse.json({ error: 'Audio file and userId are required' }, { status: 400 })
+    if (!audioFile || !userId || !userName) {
+      return NextResponse.json({ error: 'Audio file, userId and userName are required' }, { status: 400 })
     }
+
+    console.log(`Starting voice calibration for ${userName} (${userId})`)
 
     // 转换音频为 ArrayBuffer
     const audioBuffer = await audioFile.arrayBuffer()
+    console.log(`Audio file size: ${audioBuffer.byteLength} bytes`)
     
     // 使用 Deepgram 进行语音识别以验证录音质量
     const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
@@ -43,15 +46,17 @@ export async function POST(request: NextRequest) {
     // 存储语音特征
     voicePrints.set(userId, voicePrint)
 
-    console.log(`Voice calibration completed for user ${userName} (${userId})`)
-    console.log(`Transcript: ${transcript}`)
+    console.log(`✅ Voice calibration completed for ${userName} (${userId})`)
+    console.log(`📝 Transcript: "${transcript}"`)
+    console.log(`👥 Total calibrated users: ${voicePrints.size}`)
 
     return NextResponse.json({
       success: true,
       userId,
       userName,
       transcript,
-      message: 'Voice calibration completed successfully'
+      message: 'Voice calibration completed successfully',
+      totalCalibratedUsers: voicePrints.size
     })
 
   } catch (error) {

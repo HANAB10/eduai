@@ -33,6 +33,9 @@ import {
   User as UserIcon,
   Square, // Added for Stop Discussion button
 } from "lucide-react"
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
+import { useVoiceCalibration } from "@/hooks/use-voice-calibration"
+import { useRealTimeTranscription } from "@/hooks/use-real-time-transcription"
 
 interface Discussion {
   id: string
@@ -230,78 +233,93 @@ export default function EduMindAI() {
   const [showAIFeedback, setShowAIFeedback] = useState(false)
   const { user, loading, logout, getInitials, getFullName } = useUser() // Added user hook
 
-  const teamMembers: TeamMember[] = [
-    {
-      id: "1",
-      name: "Alice",
-      avatar: "/placeholder.svg?height=40&width=40",
-      participationLevel: 85,
-      lastSpoke: null,
-      speakingTime: 0,
-      thinkingPatterns: { analytical: 0.8, creative: 0.6, critical: 0.7, practical: 0.9 },
-      contributionTypes: { questions: 0, examples: 0, theories: 0, challenges: 0 },
-    },
-    {
-      id: "2",
-      name: "Bob",
-      avatar: "/placeholder.svg?height=40&width=40",
-      participationLevel: 72,
-      lastSpoke: null,
-      speakingTime: 0,
-      thinkingPatterns: { analytical: 0.9, creative: 0.8, critical: 0.6, practical: 0.7 },
-      contributionTypes: { questions: 0, examples: 0, theories: 0, challenges: 0 },
-    },
-    {
-      id: "3",
-      name: "Carol",
-      avatar: "/placeholder.svg?height=40&width=40",
-      participationLevel: 68,
-      lastSpoke: null,
-      speakingTime: 0,
-      thinkingPatterns: { analytical: 0.7, creative: 0.9, critical: 0.8, practical: 0.6 },
-      contributionTypes: { questions: 0, examples: 0, theories: 0, challenges: 0 },
-    },
-    {
-      id: "4",
-      name: "David",
-      avatar: "/placeholder.svg?height=40&width=40",
-      participationLevel: 91,
-      lastSpoke: null,
-      speakingTime: 0,
-      thinkingPatterns: { analytical: 0.6, creative: 0.7, critical: 0.9, practical: 0.8 },
-      contributionTypes: { questions: 0, examples: 0, theories: 0, challenges: 0 },
-    },
-  ]
+  // Hooks for voice calibration and transcription
+  const {
+    calibrationComplete: calibrationCompleteHook,
+    startCalibration,
+    stopCalibration,
+    isCalibrating,
+    recording,
+    countdown,
+    calibrationError,
+    recognizedSentence,
+  } = useVoiceCalibration();
 
-  // Initialize speech recognition (React 18 compatible)
+  // Use the recognizedSentence from useVoiceCalibration hook for calibration
+  useEffect(() => {
+    setVoiceCalibrationComplete(calibrationCompleteHook);
+  }, [calibrationCompleteHook]);
+
+
+  const { transcripts, startTranscription, stopTranscription, speakerStats } = useRealTimeTranscription();
+
+  // Update discussion phase based on time
+  const currentPhase = (() => {
+    if (discussionTime < 300) return "opening"
+    if (discussionTime < 600) return "exploration"
+    if (discussionTime < 900) return "deepening"
+    return "synthesis"
+  })();
+
+  // Initialize speech recognition
   useEffect(() => {
     if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-      const recognition = new (window as any).webkitSpeechRecognition()
-      recognition.continuous = true
-      recognition.interimResults = true
-      recognition.lang = "en-US"
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = true
+      recognitionRef.current.interimResults = true
+      recognitionRef.current.lang = 'zh-CN' // Set language to Chinese
 
-      recognition.onresult = (event: any) => {
-        let finalTranscript = ""
+      // Event handler for results
+      recognitionRef.current.onresult = (event: any) => {
+        let interimTranscript = ''
+        let finalTranscript = ''
         for (let i = event.resultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript
+          } else {
+            interimTranscript += event.results[i][0].transcript
           }
         }
 
         if (finalTranscript) {
+          // Process final transcript
           handleSpeechResult(finalTranscript)
+        } else if (interimTranscript && isListening) {
+          // Handle interim results if needed, e.g., for display
+          console.log('Interim:', interimTranscript)
         }
       }
 
-      recognition.onerror = (event: any) => {
+      recognitionRef.current.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error)
         setIsListening(false)
+        // Handle specific errors, e.g., 'no-speech' or 'not-allowed'
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          alert('Microphone permission not granted. Please allow microphone access in your browser settings.')
+        } else if (event.error === 'no-speech') {
+          console.log('No speech detected.')
+        }
       }
 
-      recognitionRef.current = recognition
+      recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended.')
+        setIsListening(false)
+        // If the discussion is active and recognition stops unexpectedly, try to restart it
+        if (isDiscussionActive) {
+          // Add a small delay before attempting to restart
+          setTimeout(() => {
+            if (isListening) { // Only restart if we are supposed to be listening
+              console.log('Attempting to restart recognition after unexpected end.')
+              recognitionRef.current.start()
+            }
+          }, 1000)
+        }
+      }
+    } else {
+      console.error("Speech recognition not supported in this browser.")
     }
-  }, [])
+  }, [isListening, isDiscussionActive]) // Re-run if isListening or isDiscussionActive changes
 
   // AI comprehensive intelligent system
   useEffect(() => {
@@ -315,7 +333,7 @@ export default function EduMindAI() {
     }, 8000)
 
     return () => clearInterval(aiSystemInterval)
-  }, [isDiscussionActive, aiActiveMode, discussions])
+  }, [isDiscussionActive, aiActiveMode, discussions, knowledgeBase, thinkingNetwork])
 
   // Discussion timer and phase management
   useEffect(() => {
@@ -324,9 +342,7 @@ export default function EduMindAI() {
       interval = setInterval(() => {
         setDiscussionTime((prev) => {
           const newTime = prev + 1
-          if (newTime === 300) setDiscussionPhase("exploration")
-          if (newTime === 600) setDiscussionPhase("deepening")
-          if (newTime === 900) setDiscussionPhase("synthesis")
+          // Phase transitions are now based on the derived currentPhase
           return newTime
         })
       }, 1000)
@@ -337,7 +353,7 @@ export default function EduMindAI() {
   // Intelligent silence detection
   useEffect(() => {
     let silenceInterval: any
-    if (isDiscussionActive && !isListening) {
+    if (isDiscussionActive && !isListening && transcripts.length === 0) { // Only trigger silence if not actively listening and no transcripts
       silenceInterval = setInterval(() => {
         setSilenceTime((prev) => {
           const newTime = prev + 1
@@ -349,10 +365,10 @@ export default function EduMindAI() {
         })
       }, 1000)
     } else {
-      setSilenceTime(0)
+      setSilenceTime(0) // Reset silence time if listening or discussion is not active
     }
     return () => clearInterval(silenceInterval)
-  }, [isDiscussionActive, isListening, aiActiveMode])
+  }, [isDiscussionActive, isListening, aiActiveMode, transcripts.length])
 
   const analyzeLogicalStructure = (content: string) => {
     return {
@@ -409,10 +425,10 @@ export default function EduMindAI() {
     const logicalStructure = analyzeLogicalStructure(transcript)
     const thoughtType = identifyThoughtType(transcript)
 
-    // 随机选择说话者（在实际应用中会通过语音识别确定）
+    // Randomly select speaker (in actual application, this would be determined by voice recognition)
     const speaker = teamMembers[Math.floor(Math.random() * teamMembers.length)].name
 
-    // 更新发言时长（模拟：每次发言增加10-30秒）
+    // Update speaking time (simulated: add 10-30 seconds per speech)
     const speakingDuration = Math.floor(Math.random() * 20) + 10
     setMemberSpeakingTimes((prev) => ({
       ...prev,
@@ -912,13 +928,15 @@ export default function EduMindAI() {
       .slice(0, 6)
   }
 
-  const analyzeDiscussionQuality = (content: string, logicalStructure: any): number => {
+  const analyzeDiscussionQuality = (content: string, logicalStructure?: any): number => {
     let score = 2
 
-    if (logicalStructure.hasEvidence) score += 1
-    if (logicalStructure.hasClaim) score += 1
-    if (logicalStructure.hasReasoning) score += 1
-    if (logicalStructure.hasCounterargument) score += 1
+    if (logicalStructure) {
+      if (logicalStructure.hasEvidence) score += 1
+      if (logicalStructure.hasClaim) score += 1
+      if (logicalStructure.hasReasoning) score += 1
+      if (logicalStructure.hasCounterargument) score += 1
+    }
 
     if (content.length > 30) score += 0.5
     if (content.includes("why") || content.includes("how")) score += 0.5
@@ -926,47 +944,81 @@ export default function EduMindAI() {
     return Math.min(Math.round(score), 5)
   }
 
-  const toggleDiscussion = () => {
+  const toggleDiscussion = async () => {
     if (!isDiscussionActive) {
-      startDiscussion()
+      await startDiscussion()
     } else {
+      await stopDiscussion()
+    }
+  }
+
+  const startDiscussion = async () => {
+    if (!voiceCalibrationComplete) {
+      alert('请先完成语音校准再开始讨论')
+      return
+    }
+
+    setIsDiscussionActive(true)
+    setIsListening(true)
+
+    try {
+      await startTranscription()
+      console.log('小组讨论开始，实时转录已启动')
+    } catch (error) {
+      console.error('Failed to start discussion:', error)
+      alert('启动语音识别失败，请重试')
       setIsDiscussionActive(false)
-      if (recognitionRef.current) {
-        recognitionRef.current.stop()
-      }
       setIsListening(false)
     }
   }
 
-  const startDiscussion = () => {
-    setIsDiscussionActive(true)
-    setDiscussionTime(0)
-    setDiscussionPhase("opening")
+  const stopDiscussion = async () => {
+    setIsDiscussionActive(false)
+    setIsListening(false)
 
-    // 同时开始录音
-    if (recognitionRef.current) {
-      recognitionRef.current.start()
-      setIsListening(true)
-    } else {
-      setIsListening(true)
+    try {
+      await stopTranscription()
+      console.log('小组讨论结束')
+    } catch (error) {
+      console.error('Failed to stop discussion:', error)
     }
-
-    setTimeout(() => {
-      const openingIntervention: AIIntervention = {
-        id: Date.now().toString(),
-        type: "process_guidance",
-        content: `🎯 **tRAT Discussion Started**: Welcome to your Team Readiness Assurance Test discussion on home healthcare safety! I'm here to guide your conversation and provide relevant resources. Begin by sharing your initial ranking of the three most critical safety factors, and remember to support your arguments with evidence from the assigned readings and case studies.`,
-        timestamp: new Date(),
-        priority: "high",
-        relatedKeywords: [],
-        context: {
-          triggerType: "discussion_start",
-          relatedNodes: [],
-        },
-      }
-      setAiInterventions([openingIntervention])
-    }, 2000)
   }
+
+  // Process new transcripts
+  useEffect(() => {
+    transcripts.forEach(transcript => {
+      if (transcript.content.trim()) {
+        const logicalStructure = analyzeLogicalStructure(transcript.content)
+        const quality = analyzeDiscussionQuality(transcript.content, logicalStructure)
+        const newDiscussion: Discussion = {
+          id: transcript.id,
+          speaker: transcript.speaker || `User ${transcript.speakerId}`, // Use speaker name from transcription or fallback
+          content: transcript.content,
+          timestamp: transcript.timestamp,
+          quality: quality,
+          keywords: extractKeywords(transcript.content),
+          concepts: extractConcepts(transcript.content),
+          logicalStructure: logicalStructure,
+          thoughtType: identifyThoughtType(transcript.content),
+          connectsTo: findConnections(transcript.content, discussions),
+        }
+
+        setDiscussions((prev) => {
+          // Avoid duplicate entries
+          if (prev.find(d => d.id === newDiscussion.id)) return prev
+          return [...prev, newDiscussion]
+        })
+
+        // Send to text analysis platform (simulated)
+        console.log('Sending to text analysis platform:', {
+          content: transcript.content,
+          speaker: transcript.speaker,
+          speakerId: transcript.speakerId,
+          timestamp: transcript.timestamp
+        })
+      }
+    })
+  }, [transcripts, discussions]) // Dependencies include transcripts and current discussions
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -1008,49 +1060,11 @@ export default function EduMindAI() {
 
   const startVoiceCalibration = () => {
     setShowVoiceCalibrationDialog(true)
+    startCalibration() // Call the hook function to start calibration
   }
 
-  const [calibrationCountdown, setCalibrationCountdown] = useState(0)
-
-  const beginVoiceRecording = () => {
-    setIsVoiceCalibrating(true)
-    setCalibrationCountdown(10)
-
-    // 启动倒计时
-    const countdownInterval = setInterval(() => {
-      setCalibrationCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    if (recognitionRef.current) {
-      recognitionRef.current.start()
-
-      setTimeout(() => {
-        if (recognitionRef.current) {
-          recognitionRef.current.stop()
-        }
-        setIsVoiceCalibrating(false)
-        setVoiceCalibrationComplete(true)
-        setShowVoiceCalibrationDialog(false)
-        setCalibrationCountdown(0)
-        alert("Voice calibration complete! AI can now identify speakers.")
-      }, 10000)
-    } else {
-      // 模拟语音校准
-      setTimeout(() => {
-        setIsVoiceCalibrating(false)
-        setVoiceCalibrationComplete(true)
-        setShowVoiceCalibrationDialog(false)
-        setCalibrationCountdown(0)
-        alert("Voice calibration complete! AI can now identify speakers.")
-      }, 10000)
-    }
-  }
+  // The beginVoiceRecording function from the original code is now managed by the useVoiceCalibration hook.
+  // We will use the hook's state and functions instead.
 
   const handleResourceClick = (resource: Resource) => {
     setSelectedResource(resource)
@@ -1106,11 +1120,11 @@ export default function EduMindAI() {
                   onClick={startVoiceCalibration}
                   variant="outline"
                   className={`border-orange-200 hover:bg-orange-50 ${isVoiceCalibrating ? "bg-orange-100 border-orange-300" : ""}`}
-                  disabled={isVoiceCalibrating}
+                  disabled={isVoiceCalibrating || isCalibrating} // Disable if already calibrating
                 >
                   <Mic className="w-4 h-4 mr-2 text-orange-600" />
-                  <span className={isVoiceCalibrating ? "text-orange-700" : "text-orange-600"}>
-                    {isVoiceCalibrating ? "Calibrating..." : "Voice Setup"}
+                  <span className={isVoiceCalibrating || isCalibrating ? "text-orange-700" : "text-orange-600"}>
+                    {isCalibrating ? "Calibrating..." : "Voice Setup"}
                   </span>
                 </Button>
               )}
@@ -1120,20 +1134,14 @@ export default function EduMindAI() {
                 <Button
                   onClick={startDiscussion}
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
-                  disabled={!voiceCalibrationComplete}
+                  disabled={!voiceCalibrationComplete} // Only enable after calibration
                 >
                   <Play className="w-4 h-4 mr-2" />
                   Start tRAT Discussion
                 </Button>
               ) : (
                 <Button
-                  onClick={() => {
-                    setIsDiscussionActive(false)
-                    if (recognitionRef.current) {
-                      recognitionRef.current.stop()
-                    }
-                    setIsListening(false)
-                  }}
+                  onClick={stopDiscussion} // Use stopDiscussion
                   variant="outline"
                   className="border-red-200 hover:bg-red-50"
                 >
@@ -1893,20 +1901,27 @@ export default function EduMindAI() {
               <div className="flex gap-3 justify-end">
                 <Button
                   variant="outline"
-                  onClick={() => setShowVoiceCalibrationDialog(false)}
-                  disabled={isVoiceCalibrating}
+                  onClick={() => {
+                    setShowVoiceCalibrationDialog(false)
+                    stopCalibration() // Stop calibration if dialog is closed
+                  }}
+                  disabled={isCalibrating}
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={beginVoiceRecording}
-                  disabled={isVoiceCalibrating}
+                  onClick={() => {
+                    if (!isCalibrating) {
+                      startCalibration(); // Start calibration via hook
+                    }
+                  }}
+                  disabled={isCalibrating} // Disable button while calibrating
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  {isVoiceCalibrating ? (
+                  {isCalibrating ? (
                     <>
                       <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Recording... ({calibrationCountdown}s)
+                      Recording... ({countdown}s)
                     </>
                   ) : (
                     <>
@@ -1916,6 +1931,10 @@ export default function EduMindAI() {
                   )}
                 </Button>
               </div>
+              {/* Display calibration error message if any */}
+              {calibrationError && (
+                <div className="text-red-500 text-sm text-center">{calibrationError}</div>
+              )}
             </div>
           </DialogContent>
         </Dialog>
