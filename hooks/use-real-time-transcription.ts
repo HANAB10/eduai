@@ -18,6 +18,7 @@ export function useRealTimeTranscription() {
   const [transcripts, setTranscripts] = useState<TranscriptSegment[]>([])
   const [error, setError] = useState<string | null>(null)
   const [currentSessionId] = useState(() => `session_${Date.now()}`)
+  const [speakerStats, setSpeakerStats] = useState<Record<string, { speakingTime: number, segmentCount: number }>>({})
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -129,6 +130,17 @@ export function useRealTimeTranscription() {
     }
     
     setTranscripts(prev => [...prev, newSegment])
+    
+    // 更新说话人统计
+    if (segment.speaker) {
+      setSpeakerStats(prev => ({
+        ...prev,
+        [segment.speaker!]: {
+          speakingTime: (prev[segment.speaker!]?.speakingTime || 0) + 5, // 估算每段5秒
+          segmentCount: (prev[segment.speaker!]?.segmentCount || 0) + 1
+        }
+      }))
+    }
   }, [])
 
   const clearTranscripts = useCallback(() => {
@@ -139,6 +151,7 @@ export function useRealTimeTranscription() {
     isTranscribing,
     transcripts,
     error,
+    speakerStats,
     startTranscription,
     stopTranscription,
     addTranscript,

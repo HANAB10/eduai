@@ -1060,7 +1060,20 @@ export default function EduMindAI() {
 
   const startVoiceCalibration = () => {
     setShowVoiceCalibrationDialog(true)
-    startCalibration() // Call the hook function to start calibration
+  }
+
+  const beginCalibration = async () => {
+    try {
+      const result = await startCalibration()
+      if (result?.success) {
+        console.log('语音校准成功:', result)
+        setTimeout(() => {
+          setShowVoiceCalibrationDialog(false)
+        }, 2000)
+      }
+    } catch (error) {
+      console.error('语音校准失败:', error)
+    }
   }
 
   // The beginVoiceRecording function from the original code is now managed by the useVoiceCalibration hook.
@@ -1910,12 +1923,8 @@ export default function EduMindAI() {
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    if (!isCalibrating) {
-                      startCalibration(); // Start calibration via hook
-                    }
-                  }}
-                  disabled={isCalibrating} // Disable button while calibrating
+                  onClick={beginCalibration}
+                  disabled={isCalibrating}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   {isCalibrating ? (
@@ -1931,9 +1940,15 @@ export default function EduMindAI() {
                   )}
                 </Button>
               </div>
-              {/* Display calibration error message if any */}
+              {/* 显示校准结果 */}
               {calibrationError && (
                 <div className="text-red-500 text-sm text-center">{calibrationError}</div>
+              )}
+              
+              {calibrationCompleteHook && (
+                <div className="text-green-600 text-sm text-center">
+                  ✅ 语音校准成功！识别内容: {recognizedSentence}
+                </div>
               )}
             </div>
           </DialogContent>

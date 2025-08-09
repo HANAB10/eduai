@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useRef } from 'react'
+import { useUser } from './use-user'
 
 export interface VoiceCalibrationResult {
   success: boolean
@@ -16,11 +17,20 @@ export function useVoiceCalibration() {
   const [calibrationComplete, setCalibrationComplete] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [countdown, setCountdown] = useState(0)
+  const [recognizedSentence, setRecognizedSentence] = useState<string>('')
   
+  const { user } = useUser()
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   
-  const startCalibration = async (userId: string, userName: string): Promise<VoiceCalibrationResult | null> => {
+  const startCalibration = async (): Promise<VoiceCalibrationResult | null> => {
+    if (!user) {
+      setError('用户信息未找到')
+      return null
+    }
+    
+    const userId = user.id
+    const userName = `${user.first_name} ${user.last_name}`
     try {
       setIsCalibrating(true)
       setError(null)
@@ -72,6 +82,7 @@ export function useVoiceCalibration() {
 
           if (result.success) {
             setCalibrationComplete(true)
+            setRecognizedSentence(result.transcript || '')
             setIsCalibrating(false)
             return result
           } else {
@@ -125,9 +136,17 @@ export function useVoiceCalibration() {
   return {
     isCalibrating,
     calibrationComplete,
-    error,
+    error: error,
     countdown,
+    recognizedSentence,
+    recording: isCalibrating,
+    calibrationError: error,
     startCalibration,
+    stopCalibration: () => {
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.stop()
+      }
+    },
     resetCalibration
   }
 }
