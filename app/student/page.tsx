@@ -4,13 +4,16 @@ import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import Link from "next/link"
+import { useUser } from "@/hooks/use-user"
 import {
-  Users,
+  User,
+  Settings,
+  LogOut,
   Lightbulb,
   BookOpen,
   Mic,
@@ -27,8 +30,8 @@ import {
   FileText,
   Globe,
   Plus,
-  Settings,
-  User,
+  Settings as SettingsIcon, // Alias to avoid conflict if Settings is used elsewhere
+  User as UserIcon,
 } from "lucide-react"
 
 interface Discussion {
@@ -158,6 +161,15 @@ interface Resource {
   summary: string
 }
 
+// Interface for messages within the discussion
+interface Message {
+  id: string
+  type: "user_message" | "ai_message" | "system_message"
+  content: string
+  timestamp: Date
+  author: string // e.g., "Alice", "AI Assistant", "You"
+}
+
 declare global {
   interface Window {
     webkitSpeechRecognition: any
@@ -216,6 +228,7 @@ export default function EduMindAI() {
   const [currentQuestionInput, setCurrentQuestionInput] = useState("")
   const [newMessage, setNewMessage] = useState(""); // Assuming this state variable is used for the message input
   const [showAIFeedback, setShowAIFeedback] = useState(false)
+  const { user, loading, logout, getInitials, getFullName } = useUser() // Added user hook
 
   const teamMembers: TeamMember[] = [
     {
@@ -1130,30 +1143,40 @@ export default function EduMindAI() {
 
               {/* 用户菜单 */}
               <div className="relative group">
-                <Avatar className="w-10 h-10 border-2 border-indigo-200 cursor-pointer hover:border-indigo-300 transition-colors">
-                  <AvatarFallback className="bg-indigo-100">
-                    <User className="w-5 h-5 text-indigo-600" />
+                <Avatar className="h-10 w-10 cursor-pointer border-2 border-indigo-200 hover:border-indigo-400 transition-colors">
+                  <AvatarFallback className="bg-indigo-100 text-indigo-600 font-semibold">
+                    {getInitials()}
                   </AvatarFallback>
                 </Avatar>
 
                 {/* 下拉菜单 */}
                 <div className="absolute right-0 top-12 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                   <div className="p-2">
+                    {/* 用户信息 */}
+                    <div className="px-3 py-2 border-b border-gray-200 mb-2">
+                      <p className="text-sm font-medium text-gray-900">{getFullName()}</p>
+                      <p className="text-xs text-gray-500">{user?.email}</p>
+                    </div>
+
                     <Link href="/profile">
                       <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer">
-                        <User className="w-4 h-4" />
+                        <UserIcon className="w-4 h-4" />
                         Profile
                       </div>
                     </Link>
                     <Link href="/settings">
                       <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md cursor-pointer">
-                        <Settings className="w-4 h-4" />
+                        <SettingsIcon className="w-4 h-4" />
                         Settings
                       </div>
                     </Link>
                     <div className="border-t border-gray-200 my-2"></div>
-                    <div className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer">
-                      Sign Out
+                    <div
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-md cursor-pointer"
+                      onClick={logout}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
                     </div>
                   </div>
                 </div>
@@ -1862,14 +1885,14 @@ export default function EduMindAI() {
 
               {/* Action buttons */}
               <div className="flex gap-3 justify-end">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowVoiceCalibrationDialog(false)}
                   disabled={isVoiceCalibrating}
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={beginVoiceRecording}
                   disabled={isVoiceCalibrating}
                   className="bg-blue-600 hover:bg-blue-700"
