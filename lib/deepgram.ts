@@ -1,8 +1,7 @@
-
 import { createClient, LiveTranscriptionEvents, LiveClient } from '@deepgram/sdk'
 
 // 初始化 Deepgram 客户端
-export const deepgram = createClient(process.env.DEEPGRAM_API_KEY || '')
+export const deepgram = createClient(process.env.DEEPGRAM_API_KEY!)
 
 // 语音转文字配置
 export const transcriptionConfig = {
@@ -56,7 +55,7 @@ export function extractVoiceFeatures(audioData: Blob, userId: string): Promise<V
     // 这里是简化的语音特征提取
     // 实际应用中需要使用更复杂的语音处理算法
     const features = Array.from({length: 128}, () => Math.random())
-    
+
     resolve({
       userId,
       features,
@@ -88,6 +87,6 @@ function calculateCosineSimilarity(a: number[], b: number[]): number {
   const dotProduct = a.reduce((sum, val, i) => sum + val * b[i], 0)
   const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0))
   const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0))
-  
+
   return dotProduct / (magnitudeA * magnitudeB)
 }
