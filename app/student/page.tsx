@@ -985,8 +985,22 @@ export default function EduMindAI() {
     setShowVoiceCalibrationDialog(true)
   }
 
+  const [calibrationCountdown, setCalibrationCountdown] = useState(0)
+
   const beginVoiceRecording = () => {
     setIsVoiceCalibrating(true)
+    setCalibrationCountdown(10)
+
+    // 启动倒计时
+    const countdownInterval = setInterval(() => {
+      setCalibrationCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(countdownInterval)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
 
     if (recognitionRef.current) {
       recognitionRef.current.start()
@@ -998,6 +1012,7 @@ export default function EduMindAI() {
         setIsVoiceCalibrating(false)
         setVoiceCalibrationComplete(true)
         setShowVoiceCalibrationDialog(false)
+        setCalibrationCountdown(0)
         alert("Voice calibration complete! AI can now identify speakers.")
       }, 10000)
     } else {
@@ -1006,6 +1021,7 @@ export default function EduMindAI() {
         setIsVoiceCalibrating(false)
         setVoiceCalibrationComplete(true)
         setShowVoiceCalibrationDialog(false)
+        setCalibrationCountdown(0)
         alert("Voice calibration complete! AI can now identify speakers.")
       }, 10000)
     }
@@ -1865,7 +1881,7 @@ export default function EduMindAI() {
                   {isVoiceCalibrating ? (
                     <>
                       <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Recording... ({Math.max(0, 10 - Math.floor((Date.now() % 10000) / 1000))}s)
+                      Recording... ({calibrationCountdown}s)
                     </>
                   ) : (
                     <>
