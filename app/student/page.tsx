@@ -155,6 +155,90 @@ interface TeamMember {
   }
 }
 
+// Team members data
+const teamMembers: TeamMember[] = [
+  {
+    id: "1",
+    name: "Alice",
+    avatar: "AC",
+    participationLevel: 85,
+    lastSpoke: null,
+    speakingTime: 0,
+    thinkingPatterns: {
+      analytical: 80,
+      creative: 70,
+      critical: 90,
+      practical: 65
+    },
+    contributionTypes: {
+      questions: 0,
+      examples: 0,
+      theories: 0,
+      challenges: 0
+    }
+  },
+  {
+    id: "2",
+    name: "Bob",
+    avatar: "BW",
+    participationLevel: 72,
+    lastSpoke: null,
+    speakingTime: 0,
+    thinkingPatterns: {
+      analytical: 60,
+      creative: 85,
+      critical: 70,
+      practical: 80
+    },
+    contributionTypes: {
+      questions: 0,
+      examples: 0,
+      theories: 0,
+      challenges: 0
+    }
+  },
+  {
+    id: "3",
+    name: "Carol",
+    avatar: "CD",
+    participationLevel: 92,
+    lastSpoke: null,
+    speakingTime: 0,
+    thinkingPatterns: {
+      analytical: 95,
+      creative: 75,
+      critical: 85,
+      practical: 90
+    },
+    contributionTypes: {
+      questions: 0,
+      examples: 0,
+      theories: 0,
+      challenges: 0
+    }
+  },
+  {
+    id: "4",
+    name: "David",
+    avatar: "DK",
+    participationLevel: 58,
+    lastSpoke: null,
+    speakingTime: 0,
+    thinkingPatterns: {
+      analytical: 70,
+      creative: 60,
+      critical: 65,
+      practical: 85
+    },
+    contributionTypes: {
+      questions: 0,
+      examples: 0,
+      theories: 0,
+      challenges: 0
+    }
+  }
+]
+
 interface Resource {
   id: string
   title: string
