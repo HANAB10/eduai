@@ -1202,10 +1202,6 @@ export default function EduMindAI() {
                     Real-time Progress
                   </h4>
                   <div className="space-y-3">
-                    <div className="bg-white p-3 rounded border border-blue-100 shadow-sm">
-                      <h5 className="text-xs font-medium mb-1 text-blue-800">Current Phase</h5>
-                      <p className="text-xs text-blue-700">{getPhaseLabel(discussionPhase)}</p>
-                    </div>
                     <div className="bg-white p-3 rounded border border-green-100 shadow-sm">
                       <h5 className="text-xs font-medium mb-1 text-green-800">Discussion Progress</h5>
                       <p className="text-xs text-green-700">{discussions.length} contributions made</p>
