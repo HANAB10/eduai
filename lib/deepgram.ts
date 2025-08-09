@@ -20,6 +20,14 @@ export const speakerDetectionConfig = {
   diarize: true, // 启用说话人分离
   multichannel: false,
   alternatives: 1,
+  // 启用 Deepgram 的分析功能
+  sentiment: true, // 情感分析
+  topics: true, // 话题检测
+  summarize: true, // 摘要生成
+  detect_language: true, // 语言检测
+  paragraphs: true, // 段落分割
+  utterances: true, // 语句分割
+  keywords: true, // 关键词提取
 }
 
 // 创建实时语音识别连接

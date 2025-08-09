@@ -11,6 +11,18 @@ export interface TranscriptSegment {
   content: string
   timestamp: Date
   confidence: number
+  sentiment?: string
+  topics?: string[]
+  keywords?: string[]
+}
+
+export interface AnalysisSummary {
+  totalSegments: number
+  sentimentAnalysis: Record<string, number>
+  topTopics: [string, number][]
+  topKeywords: [string, number][]
+  speakerParticipation: Record<string, number>
+  averageConfidence: number
 }
 
 export function useRealTimeTranscription() {
@@ -19,6 +31,7 @@ export function useRealTimeTranscription() {
   const [error, setError] = useState<string | null>(null)
   const [currentSessionId] = useState(() => `session_${Date.now()}`)
   const [speakerStats, setSpeakerStats] = useState<Record<string, { speakingTime: number, segmentCount: number }>>({})
+  const [analysisSummary, setAnalysisSummary] = useState<AnalysisSummary | null>(null)
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -145,16 +158,34 @@ export function useRealTimeTranscription() {
 
   const clearTranscripts = useCallback(() => {
     setTranscripts([])
+    setAnalysisSummary(null)
   }, [])
+
+  const getAnalysisSummary = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/voice/transcribe?sessionId=${currentSessionId}`)
+      const data = await response.json()
+      
+      if (data.success) {
+        setAnalysisSummary(data.summary)
+        return data.summary
+      }
+    } catch (error) {
+      console.error('Failed to get analysis summary:', error)
+    }
+    return null
+  }, [currentSessionId])
 
   return {
     isTranscribing,
     transcripts,
     error,
     speakerStats,
+    analysisSummary,
     startTranscription,
     stopTranscription,
     addTranscript,
-    clearTranscripts
+    clearTranscripts,
+    getAnalysisSummary
   }
 }
