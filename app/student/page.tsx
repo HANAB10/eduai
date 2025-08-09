@@ -12,6 +12,7 @@ import Link from "next/link"
 import { useUser } from "@/hooks/use-user"
 import {
   User,
+  Users,
   Settings,
   LogOut,
   Lightbulb,
