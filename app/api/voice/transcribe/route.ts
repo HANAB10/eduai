@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createLiveTranscription, matchSpeaker, VoicePrint } from '@/lib/deepgram'
+import { createLiveTranscription, matchSpeaker, VoicePrint, deepgram } from '@/lib/deepgram'
 
 // WebSocket 连接管理（简化版本，实际项目中可能需要更复杂的管理）
 const activeConnections = new Map()
@@ -21,6 +21,9 @@ export async function POST(request: NextRequest) {
     const { action, audioData, sessionId } = await request.json()
 
     if (action === 'start_transcription') {
+      if (!deepgram) {
+        return NextResponse.json({ error: 'Deepgram not configured' }, { status: 500 })
+      }
       // 开始实时转录
       const connection = createLiveTranscription(
         (data) => {

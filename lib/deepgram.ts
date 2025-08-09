@@ -1,7 +1,9 @@
 import { createClient, LiveTranscriptionEvents, LiveClient } from '@deepgram/sdk'
 
 // 初始化 Deepgram 客户端
-export const deepgram = createClient(process.env.DEEPGRAM_API_KEY!)
+export const deepgram = process.env.DEEPGRAM_API_KEY 
+  ? createClient(process.env.DEEPGRAM_API_KEY)
+  : null
 
 // 语音转文字配置
 export const transcriptionConfig = {
@@ -32,6 +34,9 @@ export const speakerDetectionConfig = {
 
 // 创建实时语音识别连接
 export function createLiveTranscription(onTranscript: (data: any) => void, onError: (error: any) => void) {
+  if (!deepgram) {
+    throw new Error('Deepgram client not initialized')
+  }
   const connection = deepgram.listen.live(speakerDetectionConfig)
 
   connection.on(LiveTranscriptionEvents.Open, () => {

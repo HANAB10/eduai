@@ -23,6 +23,10 @@ export async function POST(request: NextRequest) {
     const audioBuffer = await audioFile.arrayBuffer()
     console.log(`Audio file size: ${audioBuffer.byteLength} bytes`)
     
+    if (!deepgram) {
+      return NextResponse.json({ error: 'Deepgram not configured' }, { status: 500 })
+    }
+
     // 使用 Deepgram 进行语音识别以验证录音质量
     const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
       Buffer.from(audioBuffer),
