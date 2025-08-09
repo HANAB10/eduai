@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -281,39 +282,18 @@ export default function EducationDashboard() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: "#F0F4FF",
-      }}
-    >
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header
-        className="border-b px-6 py-4"
-        style={{
-          background: "#FFFFFF",
-          borderColor: "#E5E7EB",
-        }}
-      >
+      <header className="border-b px-6 py-4 bg-white border-slate-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{
-                background: "#5046E6",
-              }}
-            >
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-600">
+              <Brain className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">EduAI</h1>
+            <h1 className="text-2xl font-bold text-slate-700">Edu AI</h1>
           </div>
-          <Avatar className="ring-2 ring-offset-2" style={{ ringColor: "#E5E7EB" }}>
-            <AvatarFallback
-              className="text-white font-semibold"
-              style={{
-                background: "#5046E6",
-              }}
-            >
+          <Avatar className="ring-2 ring-offset-2 ring-slate-200">
+            <AvatarFallback className="text-white font-semibold bg-indigo-600">
               T
             </AvatarFallback>
           </Avatar>
@@ -321,26 +301,17 @@ export default function EducationDashboard() {
       </header>
 
       {/* Top Divider Line */}
-      <div
-        className="w-full h-px"
-        style={{
-          background: "#E5E7EB",
-        }}
-      />
+      <div className="w-full h-px bg-slate-200" />
 
       {/* Navigation Tabs */}
-      <div
-        style={{
-          background: "#F0F4FF",
-        }}
-      >
+      <div className="bg-gray-50">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6 pt-4 pb-2">
           <TabsList className="bg-transparent border-0 h-auto p-0 gap-3">
             <TabsTrigger
               value="dashboard"
               className="data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border data-[state=active]:border-0 rounded-lg px-4 py-2 font-medium transition-all duration-200 min-w-[120px] text-sm hover:bg-gray-100"
               style={{
-                background: activeTab === "dashboard" ? "#5046E6" : "white",
+                background: activeTab === "dashboard" ? "#4338CA" : "white",
                 borderColor: activeTab === "dashboard" ? "transparent" : "#E5E7EB",
                 border: activeTab === "dashboard" ? "none" : "1px solid #E5E7EB",
               }}
@@ -351,7 +322,7 @@ export default function EducationDashboard() {
               value="group-details"
               className="data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border data-[state=active]:border-0 rounded-lg px-4 py-2 font-medium transition-all duration-200 min-w-[120px] text-sm hover:bg-gray-100"
               style={{
-                background: activeTab === "group-details" ? "#5046E6" : "white",
+                background: activeTab === "group-details" ? "#4338CA" : "white",
                 borderColor: activeTab === "group-details" ? "transparent" : "#E5E7EB",
                 border: activeTab === "group-details" ? "none" : "1px solid #E5E7EB",
               }}
@@ -362,7 +333,7 @@ export default function EducationDashboard() {
               value="discussion-setting"
               className="data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border data-[state=active]:border-0 rounded-lg px-4 py-2 font-medium transition-all duration-200 min-w-[140px] text-sm hover:bg-gray-100"
               style={{
-                background: activeTab === "discussion-setting" ? "#5046E6" : "white",
+                background: activeTab === "discussion-setting" ? "#4338CA" : "white",
                 borderColor: activeTab === "discussion-setting" ? "transparent" : "#E5E7EB",
                 border: activeTab === "discussion-setting" ? "none" : "1px solid #E5E7EB",
               }}
@@ -385,86 +356,51 @@ export default function EducationDashboard() {
                   {groups.map((group) => (
                     <Card
                       key={group.id}
-                      className="cursor-pointer transition-all duration-300 border rounded-lg overflow-hidden hover:bg-gray-50"
-                      style={{
-                        background: "#FFFFFF",
-                        borderColor: "#E5E7EB",
-                        border: "1px solid #E5E7EB",
-                      }}
+                      className="cursor-pointer transition-all duration-300 border rounded-lg overflow-hidden hover:bg-gray-50 bg-white border-slate-200"
                       onClick={() => handleGroupClick(group.id)}
                     >
                       <CardHeader className="pb-3 transition-all duration-300">
                         <div className="flex items-center justify-between">
-                          <CardTitle className="text-xl font-bold text-gray-900">{group.name}</CardTitle>
+                          <CardTitle className="text-xl font-bold text-slate-800">{group.name}</CardTitle>
                           <Badge
                             variant={group.status === "active" ? "default" : "secondary"}
                             className={`${
-                              group.status === "active" ? "text-white border-0" : "bg-gray-100 text-gray-600 border-0"
+                              group.status === "active" ? "text-white border-0 bg-green-600" : "bg-gray-100 text-gray-600 border-0"
                             } px-3 py-1 rounded-md font-medium`}
-                            style={{
-                              background: group.status === "active" ? "#10B981" : undefined,
-                            }}
                           >
                             {group.status}
                           </Badge>
                         </div>
                       </CardHeader>
-                      <CardContent
-                        className="space-y-4 p-6"
-                        style={{
-                          background: "white",
-                        }}
-                      >
-                        <div className="flex items-center justify-between text-sm text-gray-700">
-                          <div
-                            className="flex items-center gap-2 px-3 py-1 rounded-md"
-                            style={{
-                              background: "#F9FAFB",
-                              border: "1px solid #E5E7EB",
-                            }}
-                          >
+                      <CardContent className="space-y-4 p-6 bg-white">
+                        <div className="flex items-center justify-between text-sm text-slate-700">
+                          <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-50 border border-slate-200">
                             <Users className="w-4 h-4" />
                             <span className="font-medium">{group.members} members</span>
                           </div>
-                          <div
-                            className="flex items-center gap-2 px-3 py-1 rounded-md"
-                            style={{
-                              background: "#F9FAFB",
-                              border: "1px solid #E5E7EB",
-                            }}
-                          >
+                          <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-slate-50 border border-slate-200">
                             <Clock className="w-4 h-4" />
                             <span className="font-medium">{group.duration}</span>
                           </div>
                         </div>
 
                         <div className="space-y-3">
-                          <div className="flex justify-between text-sm font-medium text-gray-800">
+                          <div className="flex justify-between text-sm font-medium text-slate-800">
                             <span>Participation Rate</span>
                             <span>{group.participation}%</span>
                           </div>
-                          <div
-                            className="relative h-3 rounded-md overflow-hidden"
-                            style={{ backgroundColor: "#E5E7EB" }}
-                          >
+                          <div className="relative h-3 rounded-md overflow-hidden bg-slate-200">
                             <div
-                              className="h-full transition-all duration-500 rounded-md"
+                              className="h-full transition-all duration-500 rounded-md bg-indigo-600"
                               style={{
                                 width: `${group.participation}%`,
-                                background: "#5046E6",
                               }}
                             />
                           </div>
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div
-                            className="flex items-center gap-2 text-sm text-gray-700 px-3 py-1 rounded-md"
-                            style={{
-                              background: "#F9FAFB",
-                              border: "1px solid #E5E7EB",
-                            }}
-                          >
+                          <div className="flex items-center gap-2 text-sm text-slate-700 px-3 py-1 rounded-md bg-slate-50 border border-slate-200">
                             <MessageCircle className="w-4 h-4" />
                             <span className="font-medium">{group.contributions} contributions</span>
                           </div>
@@ -489,54 +425,33 @@ export default function EducationDashboard() {
 
               {/* Alerts Panel */}
               <div className="lg:col-span-1">
-                <Card
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    background: "#FFFFFF",
-                    borderColor: "#E5E7EB",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
+                <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-3" style={{ color: "#FF8A65" }}>
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: "#FF8A65",
-                        }}
-                      >
+                    <CardTitle className="flex items-center gap-3 text-orange-600">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-500">
                         <AlertTriangle className="w-5 h-5 text-white" />
                       </div>
                       Real-time Alerts
                     </CardTitle>
-                    <CardDescription style={{ color: "#FF8A65" }}>Groups needing attention</CardDescription>
+                    <CardDescription className="text-orange-600">Groups needing attention</CardDescription>
                   </CardHeader>
-                  <CardContent
-                    className="space-y-4 p-6"
-                    style={{
-                      background: "white",
-                    }}
-                  >
+                  <CardContent className="space-y-4 p-6 bg-white">
                     {alerts.map((alert) => (
                       <Alert
                         key={alert.id}
-                        className="border rounded-lg"
-                        style={{
-                          background: "#FEF2F2",
-                          borderColor: "#FECACA",
-                        }}
+                        className="border rounded-lg bg-red-50 border-red-200"
                       >
                         <AlertDescription className="text-sm">
                           <div className="flex items-center gap-2 mb-2">
-                            <Activity className="w-4 h-4" style={{ color: "#DC2626" }} />
-                            <span className="font-bold" style={{ color: "#DC2626" }}>
+                            <Activity className="w-4 h-4 text-red-600" />
+                            <span className="font-bold text-red-600">
                               {alert.group}
                             </span>
                           </div>
-                          <div className="mb-2 leading-relaxed" style={{ color: "#B91C1C" }}>
+                          <div className="mb-2 leading-relaxed text-red-700">
                             {alert.message}
                           </div>
-                          <div className="text-xs font-medium" style={{ color: "#DC2626" }}>
+                          <div className="text-xs font-medium text-red-600">
                             {alert.time}
                           </div>
                         </AlertDescription>
@@ -552,83 +467,54 @@ export default function EducationDashboard() {
           <TabsContent value="group-details" className="mt-0">
             <div className="space-y-6">
               <div className="flex items-center gap-4">
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center"
-                  style={{
-                    background: "#5046E6",
-                  }}
-                >
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-indigo-600">
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900">Group 1</h2>
+                  <h2 className="text-3xl font-bold text-slate-800">Group 1</h2>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Member Participation */}
-                <Card
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    background: "#FFFFFF",
-                    borderColor: "#E5E7EB",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
+                <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-gray-800">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: "#5046E6",
-                        }}
-                      >
+                    <CardTitle className="flex items-center gap-3 text-slate-800">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                         <Users className="w-5 h-5 text-white" />
                       </div>
                       Member Participation
                     </CardTitle>
                   </CardHeader>
-                  <CardContent
-                    className="space-y-4 p-6"
-                    style={{
-                      background: "white",
-                    }}
-                  >
+                  <CardContent className="space-y-4 p-6 bg-white">
                     {groupDetails.members.map((member, index) => (
                       <div
                         key={index}
-                        className="p-4 rounded-lg space-y-3"
-                        style={{
-                          background: "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
+                        className="p-4 rounded-lg space-y-3 bg-slate-50 border border-slate-200"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="font-bold text-gray-900">{member.name}</span>
+                          <span className="font-bold text-slate-800">{member.name}</span>
                           <Badge
                             variant="outline"
                             className={`border px-3 py-1 rounded-md font-medium ${
                               member.role === "leader"
-                                ? "text-white border-0"
+                                ? "text-white border-0 bg-indigo-600"
                                 : member.role === "active"
                                   ? "border-green-300 text-green-700 bg-green-50"
                                   : member.role === "moderate"
                                     ? "border-yellow-300 text-yellow-700 bg-yellow-50"
                                     : "border-gray-300 text-gray-700 bg-gray-50"
                             }`}
-                            style={{
-                              background: member.role === "leader" ? "#5046E6" : undefined,
-                            }}
                           >
                             {member.role}
                           </Badge>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <div className="flex items-center gap-2 text-gray-700 bg-white px-3 py-1 rounded-md border border-gray-200">
+                          <div className="flex items-center gap-2 text-slate-700 bg-white px-3 py-1 rounded-md border border-slate-200">
                             <Mic className="w-4 h-4" />
                             <span className="font-medium">{member.speakTime}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-gray-700 bg-white px-3 py-1 rounded-md border border-gray-200">
+                          <div className="flex items-center gap-2 text-slate-700 bg-white px-3 py-1 rounded-md border border-slate-200">
                             <MessageCircle className="w-4 h-4" />
                             <span className="font-medium">{member.contributions} contributions</span>
                           </div>
@@ -639,83 +525,42 @@ export default function EducationDashboard() {
                 </Card>
 
                 {/* Discussion Analytics */}
-                <Card
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    background: "#FFFFFF",
-                    borderColor: "#E5E7EB",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
+                <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-gray-800">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: "#FF8A65",
-                        }}
-                      >
+                    <CardTitle className="flex items-center gap-3 text-slate-800">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500">
                         <BarChart3 className="w-5 h-5 text-white" />
                       </div>
                       Discussion Analytics
                     </CardTitle>
                   </CardHeader>
-                  <CardContent
-                    className="space-y-6 p-6"
-                    style={{
-                      background: "white",
-                    }}
-                  >
+                  <CardContent className="space-y-6 p-6 bg-white">
                     <div className="space-y-3">
-                      <Label className="text-sm font-bold text-gray-800">Discussion Mode</Label>
-                      <p
-                        className="text-sm text-gray-700 p-3 rounded-lg leading-relaxed"
-                        style={{
-                          background: "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
-                      >
+                      <Label className="text-sm font-bold text-slate-800">Discussion Mode</Label>
+                      <p className="text-sm text-slate-700 p-3 rounded-lg leading-relaxed bg-slate-50 border border-slate-200">
                         {groupDetails.discussionMode}
                       </p>
                     </div>
                     <div className="space-y-3">
-                      <Label className="text-sm font-bold text-gray-800">Engagement Level</Label>
-                      <p
-                        className="text-sm text-gray-700 p-3 rounded-lg leading-relaxed"
-                        style={{
-                          background: "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
-                      >
+                      <Label className="text-sm font-bold text-slate-800">Engagement Level</Label>
+                      <p className="text-sm text-slate-700 p-3 rounded-lg leading-relaxed bg-slate-50 border border-slate-200">
                         {groupDetails.engagementLevel}
                       </p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 pt-2">
-                      <div
-                        className="text-center p-4 rounded-lg"
-                        style={{
-                          background: "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
-                      >
-                        <div className="text-2xl font-bold" style={{ color: "#5046E6" }}>
+                      <div className="text-center p-4 rounded-lg bg-slate-50 border border-slate-200">
+                        <div className="text-2xl font-bold text-indigo-600">
                           {groupDetails.totalDuration}
                         </div>
-                        <div className="text-xs font-medium mt-1" style={{ color: "#5046E6" }}>
+                        <div className="text-xs font-medium mt-1 text-indigo-600">
                           Total Duration
                         </div>
                       </div>
-                      <div
-                        className="text-center p-4 rounded-lg"
-                        style={{
-                          background: "#F9FAFB",
-                          border: "1px solid #E5E7EB",
-                        }}
-                      >
-                        <div className="text-2xl font-bold" style={{ color: "#FF8A65" }}>
+                      <div className="text-center p-4 rounded-lg bg-slate-50 border border-slate-200">
+                        <div className="text-2xl font-bold text-blue-600">
                           {groupDetails.totalContributions}
                         </div>
-                        <div className="text-xs font-medium mt-1" style={{ color: "#FF8A65" }}>
+                        <div className="text-xs font-medium mt-1 text-blue-600">
                           Total Contributions
                         </div>
                       </div>
@@ -725,83 +570,37 @@ export default function EducationDashboard() {
               </div>
 
               {/* AI Summary */}
-              <Card
-                className="border rounded-lg overflow-hidden"
-                style={{
-                  background: "#FFFFFF",
-                  borderColor: "#E5E7EB",
-                  border: "1px solid #E5E7EB",
-                }}
-              >
+              <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-gray-800">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{
-                        background: "#5046E6",
-                      }}
-                    >
+                  <CardTitle className="flex items-center gap-3 text-slate-800">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                       <Brain className="w-5 h-5 text-white" />
                     </div>
                     AI-Generated Summary
                   </CardTitle>
                 </CardHeader>
-                <CardContent
-                  className="p-6"
-                  style={{
-                    background: "white",
-                  }}
-                >
-                  <p
-                    className="text-gray-800 leading-relaxed p-4 rounded-lg"
-                    style={{
-                      background: "#F9FAFB",
-                      border: "1px solid #E5E7EB",
-                    }}
-                  >
+                <CardContent className="p-6 bg-white">
+                  <p className="text-slate-800 leading-relaxed p-4 rounded-lg bg-slate-50 border border-slate-200">
                     {groupDetails.summary}
                   </p>
                 </CardContent>
               </Card>
 
               {/* Mind Map Placeholder */}
-              <Card
-                className="border rounded-lg overflow-hidden"
-                style={{
-                  background: "#FFFFFF",
-                  borderColor: "#E5E7EB",
-                  border: "1px solid #E5E7EB",
-                }}
-              >
+              <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-gray-800">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center"
-                      style={{
-                        background: "#FF8A65",
-                      }}
-                    >
+                  <CardTitle className="flex items-center gap-3 text-slate-800">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500">
                       <TrendingUp className="w-5 h-5 text-white" />
                     </div>
                     Discussion Mind Map
                   </CardTitle>
                 </CardHeader>
-                <CardContent
-                  className="p-6"
-                  style={{
-                    background: "white",
-                  }}
-                >
-                  <div
-                    className="h-64 rounded-lg flex items-center justify-center border-2 border-dashed"
-                    style={{
-                      background: "#F9FAFB",
-                      borderColor: "#D1D5DB",
-                    }}
-                  >
+                <CardContent className="p-6 bg-white">
+                  <div className="h-64 rounded-lg flex items-center justify-center border-2 border-dashed bg-slate-50 border-slate-300">
                     <div className="text-center">
                       <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-700 font-medium">Mind map visualization would appear here</p>
+                      <p className="text-slate-700 font-medium">Mind map visualization would appear here</p>
                     </div>
                   </div>
                 </CardContent>
@@ -815,28 +614,16 @@ export default function EducationDashboard() {
               {/* Left Column */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Group Formation */}
-                <Card
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    background: "#FFFFFF",
-                    borderColor: "#E5E7EB",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
+                <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{
-                            background: "#5046E6",
-                          }}
-                        >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                           <Users className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <CardTitle className="text-gray-800">Group Formation</CardTitle>
-                          <CardDescription className="text-gray-600">
+                          <CardTitle className="text-slate-800">Group Formation</CardTitle>
+                          <CardDescription className="text-slate-600">
                             Assign students to discussion groups
                           </CardDescription>
                         </div>
@@ -846,8 +633,7 @@ export default function EducationDashboard() {
                           onClick={autoAssignGroups}
                           variant="outline"
                           size="sm"
-                          className="border text-gray-600 hover:bg-gray-100 hover:border-gray-300 bg-white transition-all duration-200"
-                          style={{ borderColor: "#E5E7EB" }}
+                          className="border text-slate-600 hover:bg-slate-100 hover:border-slate-300 bg-white transition-all duration-200 border-slate-200"
                         >
                           <Shuffle className="w-4 h-4 mr-2" />
                           Auto Assign
@@ -855,8 +641,7 @@ export default function EducationDashboard() {
                         <Button
                           onClick={addNewGroup}
                           size="sm"
-                          className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
-                          style={{ background: "#5046E6" }}
+                          className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 bg-indigo-600"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Group
@@ -866,14 +651,8 @@ export default function EducationDashboard() {
                   </CardHeader>
                   <div className="px-6 pb-4">
                     <div className="space-y-3">
-                      <Label className="text-sm font-bold text-gray-700">Upload Student List</Label>
-                      <div
-                        className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-gray-100 transition-all duration-200"
-                        style={{
-                          borderColor: "#D1D5DB",
-                          background: "#F9FAFB",
-                        }}
-                      >
+                      <Label className="text-sm font-bold text-slate-700">Upload Student List</Label>
+                      <div className="border-2 border-dashed rounded-lg p-4 text-center hover:bg-slate-100 transition-all duration-200 border-slate-300 bg-slate-50">
                         <input
                           type="file"
                           accept=".csv,.txt"
@@ -885,64 +664,42 @@ export default function EducationDashboard() {
                           htmlFor="student-file-upload"
                           className="cursor-pointer flex flex-col items-center gap-2"
                         >
-                          <div
-                            className="w-10 h-10 rounded-lg flex items-center justify-center"
-                            style={{
-                              background: "#5046E6",
-                            }}
-                          >
+                          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-600">
                             <Upload className="w-5 h-5 text-white" />
                           </div>
                           <div className="text-sm">
-                            <p className="font-medium text-gray-700">
+                            <p className="font-medium text-slate-700">
                               {isProcessingFile ? "Processing..." : "Upload CSV file with student names"}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">CSV format: Name, Email (optional)</p>
+                            <p className="text-xs text-slate-500 mt-1">CSV format: Name, Email (optional)</p>
                           </div>
                         </label>
                       </div>
                       {uploadedFile && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2 text-sm text-slate-600">
                           <FileText className="w-4 h-4" />
                           <span>Uploaded: {uploadedFile.name}</span>
                         </div>
                       )}
                     </div>
                   </div>
-                  <CardContent
-                    className="p-6 space-y-6"
-                    style={{
-                      background: "white",
-                    }}
-                  >
+                  <CardContent className="p-6 space-y-6 bg-white">
                     {/* Unassigned Students */}
                     <div className="space-y-3">
-                      <Label className="text-sm font-bold text-gray-700">Unassigned Students</Label>
-                      <div
-                        className="min-h-[80px] p-4 border-2 border-dashed rounded-lg"
-                        style={{
-                          borderColor: "#D1D5DB",
-                          background: "#F9FAFB",
-                        }}
-                      >
+                      <Label className="text-sm font-bold text-slate-700">Unassigned Students</Label>
+                      <div className="min-h-[80px] p-4 border-2 border-dashed rounded-lg border-slate-300 bg-slate-50">
                         <div className="flex flex-wrap gap-2">
                           {unassignedStudents.map((studentId) => {
                             const student = getStudentById(studentId)
                             return student ? (
                               <div
                                 key={student.id}
-                                className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-move hover:bg-gray-100 transition-all duration-200"
-                                style={{ borderColor: "#E5E7EB" }}
+                                className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-move hover:bg-slate-100 transition-all duration-200 border-slate-200"
                                 draggable
                                 onDragStart={(e) => e.dataTransfer.setData("studentId", student.id.toString())}
                               >
                                 <Avatar className="w-6 h-6">
-                                  <AvatarFallback
-                                    className="text-xs text-gray-600"
-                                    style={{
-                                      background: "#F3F4F6",
-                                    }}
-                                  >
+                                  <AvatarFallback className="text-xs text-slate-600 bg-slate-100">
                                     {student.avatar}
                                   </AvatarFallback>
                                 </Avatar>
@@ -951,7 +708,7 @@ export default function EducationDashboard() {
                             ) : null
                           })}
                           {unassignedStudents.length === 0 && (
-                            <p className="text-gray-500 text-sm">All students have been assigned to groups</p>
+                            <p className="text-slate-500 text-sm">All students have been assigned to groups</p>
                           )}
                         </div>
                       </div>
@@ -962,7 +719,7 @@ export default function EducationDashboard() {
                       {groupFormations.map((group) => (
                         <div key={group.id} className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <Label className="text-sm font-bold" style={{ color: "#5046E6" }}>
+                            <Label className="text-sm font-bold text-indigo-600">
                               {group.name}
                             </Label>
                             <Button
@@ -975,11 +732,7 @@ export default function EducationDashboard() {
                             </Button>
                           </div>
                           <div
-                            className="min-h-[60px] p-3 border-2 border-dashed rounded-lg"
-                            style={{
-                              borderColor: "#D1D5DB",
-                              background: "#F3F4F6",
-                            }}
+                            className="min-h-[60px] p-3 border-2 border-dashed rounded-lg border-slate-300 bg-slate-100"
                             onDragOver={(e) => e.preventDefault()}
                             onDrop={(e) => {
                               e.preventDefault()
@@ -993,18 +746,12 @@ export default function EducationDashboard() {
                                 return student ? (
                                   <div
                                     key={student.id}
-                                    className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-move hover:bg-gray-100 transition-all duration-200"
-                                    style={{ borderColor: "#E5E7EB" }}
+                                    className="flex items-center gap-2 bg-white border rounded-lg px-3 py-2 cursor-move hover:bg-slate-100 transition-all duration-200 border-slate-200"
                                     draggable
                                     onDragStart={(e) => e.dataTransfer.setData("studentId", student.id.toString())}
                                   >
                                     <Avatar className="w-6 h-6">
-                                      <AvatarFallback
-                                        className="text-xs text-white"
-                                        style={{
-                                          background: "#5046E6",
-                                        }}
-                                      >
+                                      <AvatarFallback className="text-xs text-white bg-indigo-600">
                                         {student.avatar}
                                       </AvatarFallback>
                                     </Avatar>
@@ -1013,7 +760,7 @@ export default function EducationDashboard() {
                                 ) : null
                               })}
                               {group.students.length === 0 && (
-                                <p className="text-sm" style={{ color: "#5046E6" }}>
+                                <p className="text-sm text-indigo-600">
                                   Drag students here to assign them to this group
                                 </p>
                               )}
@@ -1024,12 +771,7 @@ export default function EducationDashboard() {
                     </div>
 
                     <div className="flex justify-end pt-4">
-                      <Button
-                        className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
-                        style={{
-                          background: "#5046E6",
-                        }}
-                      >
+                      <Button className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-all duration-200 bg-indigo-600">
                         Save Group Formation
                       </Button>
                     </div>
@@ -1040,118 +782,63 @@ export default function EducationDashboard() {
               {/* Right Column - Learning Materials */}
               <div className="lg:col-span-1 space-y-6">
                 {/* Learning Materials */}
-                <Card
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    background: "#FFFFFF",
-                    borderColor: "#E5E7EB",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
+                <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-gray-800">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: "#5046E6",
-                        }}
-                      >
+                    <CardTitle className="flex items-center gap-3 text-slate-800">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                         <FileText className="w-5 h-5 text-white" />
                       </div>
                       Learning Materials
                     </CardTitle>
-                    <CardDescription className="text-gray-600">
+                    <CardDescription className="text-slate-600">
                       Upload materials for students to reference during discussions
                     </CardDescription>
                   </CardHeader>
-                  <CardContent
-                    className="space-y-6 p-6"
-                    style={{
-                      background: "white",
-                    }}
-                  >
-                    <div
-                      className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-100 transition-all duration-200"
-                      style={{
-                        borderColor: "#D1D5DB",
-                        background: "#F9FAFB",
-                      }}
-                    >
-                      <div
-                        className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
-                        style={{
-                          background: "#FF8A65",
-                        }}
-                      >
+                  <CardContent className="space-y-6 p-6 bg-white">
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-slate-100 transition-all duration-200 border-slate-300 bg-slate-50">
+                      <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4 bg-blue-500">
                         <Upload className="w-8 h-8 text-white" />
                       </div>
-                      <p className="text-gray-700 mb-2 font-medium">Drag and drop files here, or click to browse</p>
-                      <p className="text-sm text-gray-500 mb-4">
+                      <p className="text-slate-700 mb-2 font-medium">Drag and drop files here, or click to browse</p>
+                      <p className="text-sm text-slate-500 mb-4">
                         Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT, JPG, PNG
                       </p>
-                      <p className="text-xs text-gray-400 mb-4">Maximum file size: 50MB per file</p>
-                      <Button
-                        className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
-                        style={{
-                          background: "#FF8A65",
-                        }}
-                      >
+                      <p className="text-xs text-slate-400 mb-4">Maximum file size: 50MB per file</p>
+                      <Button className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-blue-600 transition-all duration-200 bg-blue-500">
                         Upload Files
                       </Button>
                     </div>
 
                     {/* Uploaded Files List */}
                     <div className="space-y-4">
-                      <h4 className="font-bold text-gray-800">Uploaded Materials</h4>
+                      <h4 className="font-bold text-slate-800">Uploaded Materials</h4>
                       <div className="space-y-3">
-                        <div
-                          className="flex items-center justify-between p-4 rounded-lg border"
-                          style={{
-                            background: "#F9FAFB",
-                            borderColor: "#E5E7EB",
-                          }}
-                        >
+                        <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50 border-slate-200">
                           <div className="flex items-center gap-3">
-                            <div
-                              className="w-8 h-8 rounded-lg flex items-center justify-center"
-                              style={{
-                                background: "#5046E6",
-                              }}
-                            >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                               <FileText className="w-4 h-4 text-white" />
                             </div>
-                            <span className="text-sm font-medium text-gray-800">Course_Syllabus.pdf</span>
+                            <span className="text-sm font-medium text-slate-800">Course_Syllabus.pdf</span>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-all duration-200"
+                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-all duration-200"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
                         </div>
-                        <div
-                          className="flex items-center justify-between p-4 rounded-lg border"
-                          style={{
-                            background: "#F9FAFB",
-                            borderColor: "#E5E7EB",
-                          }}
-                        >
+                        <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50 border-slate-200">
                           <div className="flex items-center gap-3">
-                            <div
-                              className="w-8 h-8 rounded-lg flex items-center justify-center"
-                              style={{
-                                background: "#5046E6",
-                              }}
-                            >
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                               <FileText className="w-4 h-4 text-white" />
                             </div>
-                            <span className="text-sm font-medium text-gray-800">Discussion_Guidelines.docx</span>
+                            <span className="text-sm font-medium text-slate-800">Discussion_Guidelines.docx</span>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-all duration-200"
+                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-all duration-200"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -1170,54 +857,27 @@ export default function EducationDashboard() {
                 </Card>
 
                 {/* AI Prompt Setting */}
-                <Card
-                  className="border rounded-lg overflow-hidden"
-                  style={{
-                    background: "#FFFFFF",
-                    borderColor: "#E5E7EB",
-                    border: "1px solid #E5E7EB",
-                  }}
-                >
+                <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-3 text-gray-800">
-                      <div
-                        className="w-8 h-8 rounded-lg flex items-center justify-center"
-                        style={{
-                          background: "#FF8A65",
-                        }}
-                      >
+                    <CardTitle className="flex items-center gap-3 text-slate-800">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500">
                         <Brain className="w-5 h-5 text-white" />
                       </div>
                       Set AI Assistant Prompt
                     </CardTitle>
-                    <CardDescription className="text-gray-600">
+                    <CardDescription className="text-slate-600">
                       Configure the AI assistant that will guide student discussions
                     </CardDescription>
                   </CardHeader>
-                  <CardContent
-                    className="p-6 space-y-4"
-                    style={{
-                      background: "white",
-                    }}
-                  >
+                  <CardContent className="p-6 space-y-4 bg-white">
                     <Textarea
                       placeholder="Enter the prompt for the AI assistant. For example: 'You are a helpful teaching assistant that guides students through collaborative discussions. Ask probing questions, encourage participation, and help students think critically about the topic...'"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
-                      className="min-h-[200px] border rounded-lg focus:border-opacity-50 transition-all duration-200"
-                      style={{
-                        borderColor: "#E5E7EB",
-                        background: "#F9FAFB",
-                        focusBorderColor: "#5046E6",
-                      }}
+                      className="min-h-[200px] border rounded-lg focus:border-indigo-300 transition-all duration-200 border-slate-200 bg-slate-50"
                     />
                     <div className="flex justify-end">
-                      <Button
-                        className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-all duration-200"
-                        style={{
-                          background: "#FF8A65",
-                        }}
-                      >
+                      <Button className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-blue-600 transition-all duration-200 bg-blue-500">
                         Save Prompt
                       </Button>
                     </div>
