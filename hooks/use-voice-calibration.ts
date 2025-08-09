@@ -37,6 +37,11 @@ export function useVoiceCalibration() {
       setCountdown(10)
       audioChunksRef.current = []
 
+      // 检查浏览器是否支持 getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('您的浏览器不支持麦克风访问，请使用最新版本的 Chrome、Firefox 或 Safari')
+      }
+
       // 获取麦克风权限
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
@@ -121,7 +126,23 @@ export function useVoiceCalibration() {
 
     } catch (error) {
       console.error('Voice calibration error:', error)
-      setError('Failed to access microphone')
+      let errorMessage = '麦克风访问失败'
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = '麦克风权限被拒绝，请在浏览器设置中允许麦克风访问'
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = '未找到麦克风设备，请检查是否连接了麦克风'
+        } else if (error.name === 'NotReadableError') {
+          errorMessage = '麦克风被其他应用占用，请关闭其他使用麦克风的应用'
+        } else if (error.name === 'OverconstrainedError') {
+          errorMessage = '麦克风不支持所需的音频格式'
+        } else {
+          errorMessage = error.message || '麦克风访问失败'
+        }
+      }
+      
+      setError(errorMessage)
       setIsCalibrating(false)
       return null
     }

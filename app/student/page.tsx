@@ -1148,6 +1148,14 @@ export default function EduMindAI() {
 
   const beginCalibration = async () => {
     try {
+      // 先检查麦克风权限
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+      
+      if (permissionStatus.state === 'denied') {
+        alert('麦克风权限被拒绝。请在浏览器设置中允许麦克风访问，然后刷新页面重试。')
+        return
+      }
+
       const result = await startCalibration()
       if (result?.success) {
         console.log('语音校准成功:', result)
@@ -1992,6 +2000,16 @@ export default function EduMindAI() {
                   <li>• Repeat the sentence 1-2 times during recording</li>
                   <li>• Ensure you're in a quiet environment</li>
                 </ul>
+                
+                <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+                  <h5 className="text-sm font-medium text-blue-900 mb-1">Troubleshooting:</h5>
+                  <ul className="text-xs text-blue-800 space-y-1">
+                    <li>• Make sure your microphone is connected and not muted</li>
+                    <li>• Allow microphone access when prompted by the browser</li>
+                    <li>• Close other apps that might be using the microphone</li>
+                    <li>• Try refreshing the page if permission was denied</li>
+                  </ul>
+                </div>
               </div>
 
               {/* Action buttons */}
@@ -2026,12 +2044,18 @@ export default function EduMindAI() {
               </div>
               {/* 显示校准结果 */}
               {calibrationError && (
-                <div className="text-red-500 text-sm text-center">{calibrationError}</div>
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <div className="text-red-600 text-sm font-medium mb-1">❌ 校准失败</div>
+                  <div className="text-red-700 text-sm">{calibrationError}</div>
+                </div>
               )}
               
               {calibrationCompleteHook && (
-                <div className="text-green-600 text-sm text-center">
-                  ✅ 语音校准成功！识别内容: {recognizedSentence}
+                <div className="bg-green-50 border border-green-200 rounded-md p-3">
+                  <div className="text-green-600 text-sm font-medium mb-1">✅ 语音校准成功！</div>
+                  {recognizedSentence && (
+                    <div className="text-green-700 text-sm">识别内容: {recognizedSentence}</div>
+                  )}
                 </div>
               )}
             </div>
