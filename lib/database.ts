@@ -217,6 +217,79 @@ export const progressService = {
   }
 }
 
+// 语音特征存储服务
+export const voicePrintService = {
+  async saveVoicePrint(voicePrint: {
+    user_id: string
+    features: number[]
+    sample_rate: number
+    duration: number
+    transcript: string
+  }) {
+    const client = await pool.connect()
+    try {
+      const query = `
+        INSERT INTO voice_prints (user_id, features, sample_rate, duration, transcript)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (user_id) DO UPDATE SET
+          features = $2,
+          sample_rate = $3,
+          duration = $4,
+          transcript = $5,
+          updated_at = CURRENT_TIMESTAMP
+        RETURNING *
+      `
+      const result = await client.query(query, [
+        voicePrint.user_id,
+        JSON.stringify(voicePrint.features),
+        voicePrint.sample_rate,
+        voicePrint.duration,
+        voicePrint.transcript
+      ])
+      return result.rows[0]
+    } finally {
+      client.release()
+    }
+  },
+
+  async getVoicePrint(userId: string) {
+    const client = await pool.connect()
+    try {
+      const query = 'SELECT * FROM voice_prints WHERE user_id = $1'
+      const result = await client.query(query, [userId])
+      if (result.rows[0]) {
+        const row = result.rows[0]
+        return {
+          ...row,
+          features: JSON.parse(row.features)
+        }
+      }
+      return null
+    } finally {
+      client.release()
+    }
+  },
+
+  async getAllVoicePrints() {
+    const client = await pool.connect()
+    try {
+      const query = `
+        SELECT vp.*, u.first_name, u.last_name 
+        FROM voice_prints vp
+        LEFT JOIN users u ON vp.user_id::integer = u.id
+        ORDER BY vp.created_at DESC
+      `
+      const result = await client.query(query)
+      return result.rows.map(row => ({
+        ...row,
+        features: JSON.parse(row.features)
+      }))
+    } finally {
+      client.release()
+    }
+  }
+}
+
 // 初始化数据库表
 export async function initializeDatabase() {
   const client = await pool.connect()
@@ -271,14 +344,15 @@ export async function initializeDatabase() {
       )
     `)
 
-    // 语音训练数据表
+    // 语音特征数据表
     await client.query(`
-      CREATE TABLE IF NOT EXISTS voice_profiles (
+      CREATE TABLE IF NOT EXISTS voice_prints (
         id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id),
-        voice_data_url TEXT,
-        training_text TEXT,
-        is_trained BOOLEAN DEFAULT FALSE,
+        user_id VARCHAR(50) UNIQUE NOT NULL,
+        features TEXT NOT NULL,
+        sample_rate INTEGER DEFAULT 16000,
+        duration DECIMAL(5,2) DEFAULT 0.0,
+        transcript TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
