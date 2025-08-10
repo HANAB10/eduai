@@ -17,6 +17,9 @@ function storeAnalysisResult(sessionId: string, analysis: any) {
   analysisResults.get(sessionId)!.push(analysis)
 }
 
+// 存储音频数据用于说话人识别
+let currentAudioBuffer: ArrayBuffer | null = null
+
 export async function POST(request: NextRequest) {
   try {
     const { action, audioData, sessionId } = await request.json()
@@ -27,7 +30,7 @@ export async function POST(request: NextRequest) {
       }
       // 开始实时转录
       const connection = createLiveTranscription(
-        (data) => {
+        async (data) => {
           // 处理转录结果
           const transcript = data.channel.alternatives[0].transcript
           
@@ -36,10 +39,11 @@ export async function POST(request: NextRequest) {
             let identifiedUserId = null
             try {
               const enrolledUsers = azureSpeakerService.getEnrolledUsers()
-              if (enrolledUsers.length > 0 && audioBuffer) {
-                const identificationResult = await azureSpeakerService.identifySpeaker(audioBuffer, enrolledUsers)
+              if (enrolledUsers.length > 0 && currentAudioBuffer) {
+                const identificationResult = await azureSpeakerService.identifySpeaker(currentAudioBuffer, enrolledUsers)
                 if (identificationResult.success) {
                   identifiedUserId = identificationResult.identifiedUserId
+                  console.log(`🎯 Speaker identified: ${identifiedUserId}`)
                 }
               }
             } catch (error) {
@@ -83,6 +87,7 @@ export async function POST(request: NextRequest) {
       if (connection && audioData) {
         // 发送音频数据到 Deepgram
         const audioBuffer = Buffer.from(audioData, 'base64')
+        currentAudioBuffer = audioBuffer.buffer // 保存用于说话人识别
         connection.send(audioBuffer)
       }
       

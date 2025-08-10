@@ -5,7 +5,9 @@ import {
   VoiceProfileClient,
   VoiceProfile,
   SpeakerRecognizer,
-  SpeakerIdentificationModel 
+  SpeakerIdentificationModel,
+  VoiceProfileType,
+  ResultReason
 } from 'microsoft-cognitiveservices-speech-sdk'
 
 // Azure 语音服务配置
