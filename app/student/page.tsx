@@ -159,8 +159,8 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
   {
     id: "1",
-    name: "Alice",
-    avatar: "AC",
+    name: "test1",
+    avatar: "T1",
     participationLevel: 85,
     lastSpoke: null,
     speakingTime: 0,
@@ -179,8 +179,8 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: "2",
-    name: "Bob",
-    avatar: "BW",
+    name: "test2",
+    avatar: "T2",
     participationLevel: 72,
     lastSpoke: null,
     speakingTime: 0,
@@ -199,8 +199,8 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: "3",
-    name: "Carol",
-    avatar: "CD",
+    name: "test3",
+    avatar: "T3",
     participationLevel: 92,
     lastSpoke: null,
     speakingTime: 0,
@@ -219,8 +219,8 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: "4",
-    name: "David",
-    avatar: "DK",
+    name: "test4",
+    avatar: "T4",
     participationLevel: 58,
     lastSpoke: null,
     speakingTime: 0,
@@ -298,10 +298,10 @@ export default function EduMindAI() {
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
   const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const [memberSpeakingTimes, setMemberSpeakingTimes] = useState<Record<string, number>>({
-    Alice: 0,
-    Bob: 0,
-    Carol: 0,
-    David: 0,
+    "test1": 0,
+    "test2": 0,
+    "test3": 0,
+    "test4": 0,
   })
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [userQuestions, setUserQuestions] = useState<
@@ -2028,7 +2028,7 @@ export default function EduMindAI() {
               {calibrationError && (
                 <div className="text-red-500 text-sm text-center">{calibrationError}</div>
               )}
-              
+
               {calibrationCompleteHook && (
                 <div className="text-green-600 text-sm text-center">
                   ✅ 语音校准成功！识别内容: {recognizedSentence}
