@@ -1234,7 +1234,7 @@ export default function EduMindAI() {
                   disabled={!voiceCalibrationComplete} // Only enable after calibration
                 >
                   <Play className="w-4 h-4 mr-2" />
-                  Start tRAT Discussion
+                  Start Discussion
                 </Button>
               ) : (
                 <Button
