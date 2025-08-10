@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       {
         ...transcriptionConfig,
         model: 'nova-2',
-        language: 'zh-CN',
+        language: 'en-US',
       }
     )
 

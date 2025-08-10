@@ -8,7 +8,7 @@ export const deepgram = process.env.DEEPGRAM_API_KEY
 // 语音转文字配置
 export const transcriptionConfig = {
   model: 'nova-2',
-  language: 'zh-CN', // 中文识别，可以根据需要修改
+  language: 'en-US', // 英文识别，适合英国大学使用
   smart_format: true,
   interim_results: true,
   endpointing: 300,

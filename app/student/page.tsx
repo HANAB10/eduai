@@ -352,7 +352,7 @@ export default function EduMindAI() {
       recognitionRef.current = new SpeechRecognition()
       recognitionRef.current.continuous = true
       recognitionRef.current.interimResults = true
-      recognitionRef.current.lang = 'zh-CN' // Set language to Chinese
+      recognitionRef.current.lang = 'en-US' // Set language to English
 
       // Event handler for results
       recognitionRef.current.onresult = (event: any) => {

@@ -24,7 +24,7 @@ export function useSpeechRecognition(options: UseSpeechRecognitionOptions = {}) 
   const [isSupported, setIsSupported] = useState(false)
 
   const recognitionRef = useRef<SpeechRecognition | null>(null)
-  const { continuous = true, interimResults = true, language = "zh-CN", onResult, onError } = options
+  const { continuous = true, interimResults = true, language = "en-US", onResult, onError } = options
 
   useEffect(() => {
     if (typeof window !== "undefined") {
