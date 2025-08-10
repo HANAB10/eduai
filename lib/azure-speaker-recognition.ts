@@ -162,6 +162,33 @@ export class AzureSpeakerRecognitionService {
       .filter(([_, profile]) => profile.enrollmentStatus === 'enrolled')
       .map(([userId]) => userId)
   }
+
+  // 删除语音配置文件
+  async deleteVoiceProfile(profileId: string): Promise<{ success: boolean, error?: string }> {
+    if (!this.voiceProfileClient) {
+      return { success: false, error: 'Azure Speech service not configured' }
+    }
+
+    try {
+      // 找到对应的配置文件
+      const userId = Array.from(userProfiles.entries())
+        .find(([_, profile]) => profile.profileId === profileId)?.[0]
+
+      if (userId) {
+        const profile = voiceProfiles.get(userId)
+        if (profile) {
+          await this.voiceProfileClient.deleteProfileAsync(profile)
+          voiceProfiles.delete(userId)
+          userProfiles.delete(userId)
+        }
+      }
+
+      return { success: true }
+    } catch (error) {
+      console.error('Failed to delete voice profile:', error)
+      return { success: false, error: 'Failed to delete voice profile' }
+    }
+  }
 }
 
 // 单例实例

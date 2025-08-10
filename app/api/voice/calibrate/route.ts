@@ -45,6 +45,13 @@ export async function POST(request: NextRequest) {
     }
 
 
+    // 检查是否已有语音配置文件，如果有则先删除
+    const existingProfile = azureSpeakerService.getUserProfile(userId)
+    if (existingProfile) {
+      console.log(`Deleting existing voice profile for user ${userId}`)
+      await azureSpeakerService.deleteVoiceProfile(existingProfile.profileId)
+    }
+
     // 创建 Azure 语音配置文件
     let profileResult = await azureSpeakerService.createVoiceProfile(userId)
     if (!profileResult.success) {
