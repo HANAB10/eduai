@@ -16,11 +16,17 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Starting voice calibration for ${userName} (${userId})`)
+    console.log(`Audio file type: ${audioFile.type}, size: ${audioFile.size} bytes`)
+
+    // 验证Azure配置
+    if (!process.env.AZURE_SPEECH_KEY || !process.env.AZURE_SPEECH_REGION) {
+      console.error('Azure Speech service not configured')
+      return NextResponse.json({ error: 'Voice recognition service not configured' }, { status: 500 })
+    }
 
     // 转换音频为 ArrayBuffer
     const audioBuffer = await audioFile.arrayBuffer()
-    const audioBlob = new Blob([audioBuffer]) // Create a Blob for Azure service
-    console.log(`Audio file size: ${audioBuffer.byteLength} bytes`)
+    console.log(`Audio buffer size: ${audioBuffer.byteLength} bytes`)
 
     // Optional: Use Deepgram for initial transcription quality check if needed
     let transcript = ''
@@ -53,18 +59,28 @@ export async function POST(request: NextRequest) {
     }
 
     // 创建 Azure 语音配置文件
+    console.log(`Creating voice profile for user: ${userId}`)
     let profileResult = await azureSpeakerService.createVoiceProfile(userId)
     if (!profileResult.success) {
+      console.error(`Failed to create profile: ${profileResult.error}`)
       return NextResponse.json({ error: profileResult.error }, { status: 500 })
     }
+    
+    console.log(`Profile created successfully: ${profileResult.profileId}`)
 
     // 注册语音样本
-    const enrollResult = await azureSpeakerService.enrollVoiceProfile(userId, await audioBlob.arrayBuffer())
+    console.log(`Enrolling voice sample for user: ${userId}`)
+    const enrollResult = await azureSpeakerService.enrollVoiceProfile(userId, audioBuffer)
     if (!enrollResult.success) {
+      console.error(`Failed to enroll profile: ${enrollResult.error}`)
       // If enrollment fails, delete the created profile
-      await azureSpeakerService.deleteVoiceProfile(profileResult.profileId)
+      if (profileResult.profileId) {
+        await azureSpeakerService.deleteVoiceProfile(profileResult.profileId)
+      }
       return NextResponse.json({ error: enrollResult.error }, { status: 500 })
     }
+    
+    console.log(`Voice enrollment completed with status: ${enrollResult.enrollmentStatus}`)
 
     // 存储到数据库
     await db.query(

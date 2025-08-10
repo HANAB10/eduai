@@ -7,20 +7,28 @@ import {
   SpeakerRecognizer,
   SpeakerIdentificationModel,
   VoiceProfileType,
-  ResultReason
+  ResultReason,
+  PushAudioInputStream,
+  AudioStreamFormat
 } from 'microsoft-cognitiveservices-speech-sdk'
 
 // Azure 语音服务配置
-export const speechConfig = process.env.AZURE_SPEECH_KEY && process.env.AZURE_SPEECH_REGION
-  ? SpeechConfig.fromSubscription(process.env.AZURE_SPEECH_KEY, process.env.AZURE_SPEECH_REGION)
-  : null
+let speechConfig: SpeechConfig | null = null
 
-if (speechConfig) {
-  speechConfig.speechRecognitionLanguage = 'en-US'
-  console.log('Azure Speech service configured for region:', process.env.AZURE_SPEECH_REGION)
+if (process.env.AZURE_SPEECH_KEY && process.env.AZURE_SPEECH_REGION) {
+  try {
+    speechConfig = SpeechConfig.fromSubscription(process.env.AZURE_SPEECH_KEY, process.env.AZURE_SPEECH_REGION)
+    speechConfig.speechRecognitionLanguage = 'en-US'
+    console.log('Azure Speech service configured for region:', process.env.AZURE_SPEECH_REGION)
+  } catch (error) {
+    console.error('Failed to initialize Azure Speech Config:', error)
+    speechConfig = null
+  }
 } else {
   console.error('Azure Speech service not configured. Missing AZURE_SPEECH_KEY or AZURE_SPEECH_REGION')
 }
+
+export { speechConfig }
 
 // 语音特征接口
 export interface AzureVoicePrint {
@@ -51,10 +59,27 @@ export class AzureSpeakerRecognitionService {
     }
 
     try {
-      const profile = await this.voiceProfileClient.createProfileAsync(
-        VoiceProfileType.TextDependentVerification,
-        'en-us'
-      )
+      console.log(`Creating voice profile for user: ${userId}`)
+      
+      // 使用文本无关的识别模式，更适合多说话人识别
+      const profile = await new Promise<VoiceProfile>((resolve, reject) => {
+        this.voiceProfileClient!.createProfileAsync(
+          VoiceProfileType.TextIndependentIdentification,
+          'en-us',
+          (result) => {
+            if (result.reason === ResultReason.EnrolledVoiceProfile) {
+              resolve(result)
+            } else {
+              reject(new Error(`Profile creation failed: ${result.errorDetails}`))
+            }
+          },
+          (error) => {
+            reject(error)
+          }
+        )
+      })
+
+      console.log(`Voice profile created successfully: ${profile.profileId}`)
 
       const voicePrint: AzureVoicePrint = {
         userId,
@@ -69,7 +94,7 @@ export class AzureSpeakerRecognitionService {
       return { success: true, profileId: profile.profileId }
     } catch (error) {
       console.error('Failed to create voice profile:', error)
-      return { success: false, error: 'Failed to create voice profile' }
+      return { success: false, error: `Failed to create voice profile: ${error}` }
     }
   }
 
@@ -85,16 +110,30 @@ export class AzureSpeakerRecognitionService {
     }
 
     try {
-      // 创建音频配置 - 使用流式输入而不是文件输入
-      const audioConfig = AudioConfig.fromStreamInput({
-        read: () => new Uint8Array(audioBuffer),
-        close: () => {}
-      })
+      console.log(`Enrolling voice profile for user: ${userId}, audio size: ${audioBuffer.byteLength} bytes`)
       
-      const result = await this.voiceProfileClient.enrollProfileAsync(
-        profile,
-        audioConfig
-      )
+      // 创建音频流
+      const audioStream = PushAudioInputStream.create(AudioStreamFormat.getWaveFormatPCM(16000, 16, 1))
+      const audioConfig = AudioConfig.fromStreamInput(audioStream)
+      
+      // 将音频数据写入流
+      audioStream.write(audioBuffer)
+      audioStream.close()
+
+      const result = await new Promise<any>((resolve, reject) => {
+        this.voiceProfileClient!.enrollProfileAsync(
+          profile,
+          audioConfig,
+          (result) => {
+            resolve(result)
+          },
+          (error) => {
+            reject(error)
+          }
+        )
+      })
+
+      console.log(`Enrollment result: ${result.reason}`)
 
       // 更新注册状态
       const userProfile = userProfiles.get(userId)
@@ -109,7 +148,7 @@ export class AzureSpeakerRecognitionService {
       }
     } catch (error) {
       console.error('Failed to enroll voice profile:', error)
-      return { success: false, error: 'Failed to enroll voice profile' }
+      return { success: false, error: `Failed to enroll voice profile: ${error}` }
     }
   }
 
