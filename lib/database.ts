@@ -1,4 +1,3 @@
-
 import { Pool } from 'pg'
 
 // PostgreSQL 连接池
@@ -40,7 +39,7 @@ export const userService = {
         userData.student_id || null,
         userData.staff_id || null
       ]
-      
+
       const result = await client.query(query, values)
       return result.rows[0]
     } finally {
@@ -344,19 +343,21 @@ export async function initializeDatabase() {
       )
     `)
 
-    // 语音特征数据表
+    // 语音特征数据表 - Replaced with voice_calibrations for Azure Speaker Recognition
     await client.query(`
-      CREATE TABLE IF NOT EXISTS voice_prints (
+      CREATE TABLE IF NOT EXISTS voice_calibrations (
         id SERIAL PRIMARY KEY,
-        user_id VARCHAR(50) UNIQUE NOT NULL,
-        features TEXT NOT NULL,
-        sample_rate INTEGER DEFAULT 16000,
-        duration DECIMAL(5,2) DEFAULT 0.0,
+        user_id VARCHAR(255) NOT NULL UNIQUE,
+        profile_id VARCHAR(255) NOT NULL,
+        enrollment_status VARCHAR(50) NOT NULL DEFAULT 'enrolling',
         transcript TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_id (user_id),
+        INDEX idx_profile_id (profile_id)
       )
     `)
+
 
     // 学生参与度统计表
     await client.query(`
@@ -372,7 +373,7 @@ export async function initializeDatabase() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `)
-    
+
     console.log('数据库表初始化完成')
   } finally {
     client.release()

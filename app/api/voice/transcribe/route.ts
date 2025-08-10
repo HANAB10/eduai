@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createLiveTranscription, matchSpeaker, VoicePrint, deepgram } from '@/lib/deepgram'
+import { createLiveTranscription, deepgram } from '@/lib/deepgram'
+import { azureSpeakerService } from '@/lib/azure-speaker-recognition'
 
 // WebSocket 连接管理（简化版本，实际项目中可能需要更复杂的管理）
 const activeConnections = new Map()
@@ -31,13 +32,24 @@ export async function POST(request: NextRequest) {
           const transcript = data.channel.alternatives[0].transcript
           
           if (transcript && transcript.trim() !== '') {
-            // 尝试识别说话人
-            const speakerId = data.channel.alternatives[0].speaker // Deepgram 的说话人分离结果
+            // 使用 Azure 进行说话人识别
+            let identifiedUserId = null
+            try {
+              const enrolledUsers = azureSpeakerService.getEnrolledUsers()
+              if (enrolledUsers.length > 0 && audioBuffer) {
+                const identificationResult = await azureSpeakerService.identifySpeaker(audioBuffer, enrolledUsers)
+                if (identificationResult.success) {
+                  identifiedUserId = identificationResult.identifiedUserId
+                }
+              }
+            } catch (error) {
+              console.error('Speaker identification error:', error)
+            }
             
-            // 提取 Deepgram 的分析结果
+            // 提取 Deepgram 的分析结果，结合 Azure 的说话人识别
             const analysis = {
               transcript,
-              speakerId,
+              speakerId: identifiedUserId, // 使用 Azure 识别的说话人
               sentiment: data.channel.alternatives[0].sentiment, // 情感分析
               topics: data.metadata?.topics || [], // 话题检测
               keywords: data.metadata?.keywords || [], // 关键词

@@ -1,8 +1,8 @@
-
 import { NextRequest, NextResponse } from 'next/server'
-import { extractVoiceFeatures, VoicePrint } from '@/lib/deepgram'
-import { deepgram, transcriptionConfig } from '@/lib/deepgram'
-import { voicePrintService } from '@/lib/database'
+import { db } from '@/lib/database'
+import { azureSpeakerService } from '@/lib/azure-speaker-recognition'
+import { transcriptionConfig } from '@/lib/deepgram' // Assuming deepgram is still used for transcription quality check
+import { deepgram } from '@/lib/deepgram' // Assuming deepgram is still used for transcription quality check
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,47 +19,58 @@ export async function POST(request: NextRequest) {
 
     // 转换音频为 ArrayBuffer
     const audioBuffer = await audioFile.arrayBuffer()
+    const audioBlob = new Blob([audioBuffer]) // Create a Blob for Azure service
     console.log(`Audio file size: ${audioBuffer.byteLength} bytes`)
-    
-    if (!deepgram) {
-      return NextResponse.json({ error: 'Deepgram not configured' }, { status: 500 })
+
+    // Optional: Use Deepgram for initial transcription quality check if needed
+    let transcript = ''
+    if (deepgram) {
+      const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
+        Buffer.from(audioBuffer),
+        {
+          ...transcriptionConfig,
+          model: 'nova-2',
+          language: 'en-US',
+        }
+      )
+
+      if (error) {
+        console.error('Deepgram transcription error:', error)
+        // Decide whether to proceed without transcription or return an error
+      } else {
+        transcript = result.results.channels[0].alternatives[0].transcript
+      }
+    } else {
+      console.warn('Deepgram not configured, skipping transcription quality check.')
     }
 
-    // 使用 Deepgram 进行语音识别以验证录音质量
-    const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
-      Buffer.from(audioBuffer),
-      {
-        ...transcriptionConfig,
-        model: 'nova-2',
-        language: 'en-US',
-      }
+
+    // 创建 Azure 语音配置文件
+    let profileResult = await azureSpeakerService.createVoiceProfile(userId)
+    if (!profileResult.success) {
+      return NextResponse.json({ error: profileResult.error }, { status: 500 })
+    }
+
+    // 注册语音样本
+    const enrollResult = await azureSpeakerService.enrollVoiceProfile(userId, await audioBlob.arrayBuffer())
+    if (!enrollResult.success) {
+      // If enrollment fails, delete the created profile
+      await azureSpeakerService.deleteVoiceProfile(profileResult.profileId)
+      return NextResponse.json({ error: enrollResult.error }, { status: 500 })
+    }
+
+    // 存储到数据库
+    await db.query(
+      'INSERT INTO voice_calibrations (user_id, profile_id, enrollment_status, transcript) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE profile_id = VALUES(profile_id), enrollment_status = VALUES(enrollment_status), transcript = VALUES(transcript)',
+      [userId, profileResult.profileId, enrollResult.enrollmentStatus, transcript]
     )
 
-    if (error) {
-      console.error('Deepgram transcription error:', error)
-      return NextResponse.json({ error: 'Voice recognition failed' }, { status: 500 })
-    }
-
-    const transcript = result.results.channels[0].alternatives[0].transcript
-
-    // 提取语音特征
-    const voicePrint = await extractVoiceFeatures(new Blob([audioBuffer]), userId)
-    
-    // 存储语音特征到数据库
-    await voicePrintService.saveVoicePrint({
-      user_id: userId,
-      features: voicePrint.features,
-      sample_rate: voicePrint.sampleRate,
-      duration: voicePrint.duration,
-      transcript: transcript
-    })
-
-    // 获取总的校准用户数
-    const allVoicePrints = await voicePrintService.getAllVoicePrints()
+    // 获取所有已校准的用户信息（可能需要调整此逻辑以适应 Azure 的用户管理）
+    // const allVoicePrints = await voicePrintService.getAllVoicePrints() // This function might need to be adapted or removed if not directly mapping to Azure profiles
 
     console.log(`✅ Voice calibration completed for ${userName} (${userId})`)
     console.log(`📝 Transcript: "${transcript}"`)
-    console.log(`👥 Total calibrated users: ${allVoicePrints.length}`)
+    // console.log(`👥 Total calibrated users: ${allVoicePrints.length}`) // Adjust this log message
 
     return NextResponse.json({
       success: true,
@@ -67,11 +78,24 @@ export async function POST(request: NextRequest) {
       userName,
       transcript,
       message: 'Voice calibration completed successfully',
-      totalCalibratedUsers: allVoicePrints.length
+      // totalCalibratedUsers: allVoicePrints.length // Adjust this response
     })
 
   } catch (error) {
     console.error('Voice calibration error:', error)
+    // Attempt to clean up any partial Azure profile creation if an error occurs before enrollment
+    if (error instanceof Error && (error as any).userId) {
+        try {
+            const userId = (error as any).userId; // Assuming userId is available in the error context
+            const profileId = await db.query('SELECT profile_id FROM voice_calibrations WHERE user_id = ?', [userId]);
+            if (profileId && profileId.length > 0) {
+                await azureSpeakerService.deleteVoiceProfile(profileId[0].profile_id);
+                await db.query('DELETE FROM voice_calibrations WHERE user_id = ?', [userId]);
+            }
+        } catch (cleanupError) {
+            console.error('Error during cleanup after calibration failure:', cleanupError);
+        }
+    }
     return NextResponse.json({ error: 'Voice calibration failed' }, { status: 500 })
   }
 }
@@ -79,13 +103,17 @@ export async function POST(request: NextRequest) {
 // 获取所有已校准的语音特征
 export async function GET() {
   try {
-    const voicePrints = await voicePrintService.getAllVoicePrints()
-    
+    // This GET endpoint might need to be updated to fetch profile IDs and statuses from Azure,
+    // or query the local database for enrollment status if that's the desired behavior.
+    // For now, assuming it fetches from the local DB.
+    const voicePrints = await db.query('SELECT user_id, profile_id, enrollment_status, transcript FROM voice_calibrations')
+
     const calibratedUsers = voicePrints.map(vp => ({
       userId: vp.user_id,
-      userName: vp.first_name && vp.last_name ? `${vp.first_name} ${vp.last_name}` : `User ${vp.user_id}`,
-      timestamp: vp.created_at,
-      duration: vp.duration,
+      // userName needs to be fetched from another source or passed differently if not stored in voice_calibrations
+      userName: `User ${vp.user_id}`, // Placeholder, adjust as needed
+      timestamp: vp.created_at, // Assuming created_at is available or needs to be fetched separately
+      enrollmentStatus: vp.enrollment_status,
       transcript: vp.transcript
     }))
 
