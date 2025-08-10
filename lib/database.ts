@@ -8,6 +8,19 @@ const pool = new Pool({
   connectionTimeoutMillis: 2000,
 })
 
+// 导出数据库连接池供直接查询使用
+export const db = {
+  query: async (text: string, params?: any[]) => {
+    const client = await pool.connect()
+    try {
+      const result = await client.query(text, params)
+      return result.rows
+    } finally {
+      client.release()
+    }
+  }
+}
+
 export interface User {
   id: number
   user_type: "student" | "staff"

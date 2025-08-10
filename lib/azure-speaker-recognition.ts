@@ -17,6 +17,9 @@ export const speechConfig = process.env.AZURE_SPEECH_KEY && process.env.AZURE_SP
 
 if (speechConfig) {
   speechConfig.speechRecognitionLanguage = 'en-US'
+  console.log('Azure Speech service configured for region:', process.env.AZURE_SPEECH_REGION)
+} else {
+  console.error('Azure Speech service not configured. Missing AZURE_SPEECH_KEY or AZURE_SPEECH_REGION')
 }
 
 // 语音特征接口
@@ -82,8 +85,11 @@ export class AzureSpeakerRecognitionService {
     }
 
     try {
-      // 创建音频配置
-      const audioConfig = AudioConfig.fromWavFileInput(new Uint8Array(audioBuffer))
+      // 创建音频配置 - 使用流式输入而不是文件输入
+      const audioConfig = AudioConfig.fromStreamInput({
+        read: () => new Uint8Array(audioBuffer),
+        close: () => {}
+      })
       
       const result = await this.voiceProfileClient.enrollProfileAsync(
         profile,
@@ -124,7 +130,10 @@ export class AzureSpeakerRecognitionService {
       }
 
       // 创建音频配置和识别器
-      const audioConfig = AudioConfig.fromWavFileInput(new Uint8Array(audioBuffer))
+      const audioConfig = AudioConfig.fromStreamInput({
+        read: () => new Uint8Array(audioBuffer),
+        close: () => {}
+      })
       const model = SpeakerIdentificationModel.fromProfiles(profiles)
       const recognizer = new SpeakerRecognizer(speechConfig, audioConfig)
 

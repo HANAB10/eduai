@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // 存储到数据库
     await db.query(
-      'INSERT INTO voice_calibrations (user_id, profile_id, enrollment_status, transcript) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE profile_id = VALUES(profile_id), enrollment_status = VALUES(enrollment_status), transcript = VALUES(transcript)',
+      'INSERT INTO voice_calibrations (user_id, profile_id, enrollment_status, transcript) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET profile_id = $2, enrollment_status = $3, transcript = $4, updated_at = CURRENT_TIMESTAMP',
       [userId, profileResult.profileId, enrollResult.enrollmentStatus, transcript]
     )
 
