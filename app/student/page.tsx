@@ -1333,11 +1333,11 @@ export default function EduMindAI() {
                 <Button
                   onClick={startVoiceCalibration}
                   variant="outline"
-                  className={`border-orange-200 hover:bg-orange-50 ${isVoiceCalibrating ? "bg-orange-100 border-orange-300" : ""}`}
-                  disabled={isVoiceCalibrating || isCalibrating} // Disable if already calibrating
+                  className={`border-orange-200 hover:bg-orange-50 ${isCalibrating ? "bg-orange-100 border-orange-300" : ""}`}
+                  disabled={isCalibrating} // Disable if already calibrating
                 >
                   <Mic className="w-4 h-4 mr-2 text-orange-600" />
-                  <span className={isVoiceCalibrating || isCalibrating ? "text-orange-700" : "text-orange-600"}>
+                  <span className={isCalibrating ? "text-orange-700" : "text-orange-600"}>
                     {isCalibrating ? "Calibrating..." : "Voice Setup"}
                   </span>
                 </Button>
