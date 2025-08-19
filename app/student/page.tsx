@@ -382,32 +382,39 @@ export default function EduMindAI() {
       timestamp: Date
       author: string
     }>
-  >([
-    {
-      id: "1",
-      content: "Is using a laptop late at night worse than using a phone in bed?",
-      timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-      author: "Alice Chen",
-    },
-    {
-      id: "2",
-      content: "How much daily screen time becomes unhealthy for students?",
-      timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-      author: "Marcus Johnson",
-    },
-    {
-      id: "3",
-      content: "Do blue-light filters actually improve sleep?",
-      timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-      author: "Sarah Williams",
-    },
-    {
-      id: "4",
-      content: "Do weekend 'digital detox' programs improve concentration long-term?",
-      timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-      author: "David Park",
-    },
-  ])
+  >([])
+
+  // Initialize userQuestions with fixed timestamps on client side only
+  useEffect(() => {
+    if (userQuestions.length === 0) {
+      setUserQuestions([
+        {
+          id: "1",
+          content: "Is using a laptop late at night worse than using a phone in bed?",
+          timestamp: new Date(Date.now() - 300000), // 5 minutes ago
+          author: "Alice Chen",
+        },
+        {
+          id: "2",
+          content: "How much daily screen time becomes unhealthy for students?",
+          timestamp: new Date(Date.now() - 240000), // 4 minutes ago
+          author: "Marcus Johnson",
+        },
+        {
+          id: "3",
+          content: "Do blue-light filters actually improve sleep?",
+          timestamp: new Date(Date.now() - 180000), // 3 minutes ago
+          author: "Sarah Williams",
+        },
+        {
+          id: "4",
+          content: "Do weekend 'digital detox' programs improve concentration long-term?",
+          timestamp: new Date(Date.now() - 120000), // 2 minutes ago
+          author: "David Park",
+        },
+      ])
+    }
+  }, [])
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
   const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const { user: currentUser, loading, logout, getInitials, getFullName } = useUser() // Added user hook and renamed `user` to `currentUser`
@@ -2016,7 +2023,14 @@ export default function EduMindAI() {
                         userQuestions.map((question) => (
                           <div key={question.id} className="bg-white p-2 rounded border border-indigo-100 text-xs ">
                             <div className="text-indigo-800">{question.content}</div>
-                            <div className="text-indigo-600 text-xs mt-1">{question.timestamp.toLocaleTimeString()}</div>
+                            <div className="text-indigo-600 text-xs mt-1">
+                              {question.timestamp.toLocaleTimeString('en-US', { 
+                                hour12: false, 
+                                hour: '2-digit', 
+                                minute: '2-digit', 
+                                second: '2-digit' 
+                              })}
+                            </div>
                           </div>
                         ))
                       )}
