@@ -410,7 +410,7 @@ export default function EduMindAI() {
   ])
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
   const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
-  const { user, loading, logout, getInitials, getFullName } = useUser() // Added user hook
+  const { user: currentUser, loading, logout, getInitials, getFullName } = useUser() // Added user hook and renamed `user` to `currentUser`
 
   // Hooks for voice calibration and transcription
   const {
@@ -1203,6 +1203,7 @@ export default function EduMindAI() {
   }, [transcripts, discussions]) // Dependencies include transcripts and current discussions
 
   const startVoiceCalibration = () => {
+    // Removed user check for testing purposes
     setShowVoiceCalibrationDialog(true)
   }
 
@@ -1329,19 +1330,18 @@ export default function EduMindAI() {
             </h1>
             <div className="flex items-center gap-4">
               {/* Voice Calibration Button */}
-              {!voiceCalibrationComplete && (
-                <Button
-                  onClick={startVoiceCalibration}
-                  variant="outline"
-                  className={`border-orange-200 hover:bg-orange-50 ${isCalibrating ? "bg-orange-100 border-orange-300" : ""}`}
-                  disabled={isCalibrating} // Disable if already calibrating
-                >
-                  <Mic className="w-4 h-4 mr-2 text-orange-600" />
-                  <span className={isCalibrating ? "text-orange-700" : "text-orange-600"}>
-                    {isCalibrating ? "Calibrating..." : "Voice Setup"}
-                  </span>
-                </Button>
-              )}
+              {/* Modified to remove user check for testing */}
+              <Button
+                onClick={startVoiceCalibration}
+                variant="outline"
+                className={`border-orange-200 hover:bg-orange-50 ${isCalibrating ? "bg-orange-100 border-orange-300" : ""}`}
+                disabled={isCalibrating} // Remove user check for testing
+              >
+                <Mic className="w-4 h-4 mr-2 text-orange-600" />
+                <span className={isCalibrating ? "text-orange-700" : "text-orange-600"}>
+                  {isCalibrating ? "Calibrating..." : "Voice Setup"}
+                </span>
+              </Button>
 
               {/* Combined Start Button */}
               {!isDiscussionActive ? (
@@ -1389,7 +1389,7 @@ export default function EduMindAI() {
                     {/* 用户信息 */}
                     <div className="px-3 py-2 border-b border-gray-200 mb-2">
                       <p className="text-sm font-medium text-gray-900">{getFullName()}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
+                      <p className="text-xs text-gray-500">{currentUser?.email}</p>
                     </div>
 
                     <Link href="/profile">
