@@ -697,18 +697,17 @@ export default function EduMindAI() {
     return {
       id: Date.now().toString(),
       type: "knowledge_synthesis",
-      content: `🎯 **Deeper Analysis**: This safety factor needs more depth. Can you connect it to specific protocols from the readings? What evidence supports ranking this factor above others?`,
+      content: `🎯 **Deeper Analysis**: This health factor needs more depth. Can you connect it to specific research from the readings? What evidence supports ranking this factor above others?`,
       timestamp: new Date(),
       priority: "high",
       relatedKeywords: [],
       resources: [
         {
-          id: "res-2",
-          title: "Patient Safety Metrics in Home Care",
+          id: "sleep-technology-research-2024",
+          title: "The Impact of Blue Light on Student Sleep Patterns",
           type: "research",
-          summary: "Peer-reviewed research on measuring and improving patient safety outcomes in home healthcare",
-          content:
-            "Recent studies show that home healthcare safety requires different metrics and approaches compared to institutional care...",
+          url: "https://www.sleepfoundation.org/how-sleep-works/blue-light-and-sleep",
+          summary: "Research findings on how blue light from digital devices affects melatonin production and sleep quality in students",
         },
       ],
       context: {
@@ -738,25 +737,24 @@ export default function EduMindAI() {
     return {
       id: Date.now().toString(),
       type: "resource_provision",
-      content: `📚 **Resource Connection**: Based on your discussion, I found relevant materials about home healthcare safety protocols. Click on the resources to explore further evidence for your safety factor rankings.`,
+      content: `📚 **Resource Connection**: Based on your discussion, I found relevant research about digital wellness and student health. Click on the resources to explore evidence for your health factor rankings.`,
       timestamp: new Date(),
       priority: "medium",
       relatedKeywords: relevantConcepts.map((c) => c.name),
       resources: [
         {
-          id: "res-3",
-          title: "Technology Solutions for Home Patient Monitoring",
+          id: "uk-student-mental-health-2023",
+          title: "UK Student Mental Health Report (2023)",
           type: "webpage",
-          url: "https://example.com/home-monitoring-tech",
-          summary: "Interactive guide on implementing technology solutions for patient safety in home care",
+          url: "https://www.advance-he.ac.uk/knowledge-hub/student-mental-health-and-wellbeing-insight-survey-2023",
+          summary: "Comprehensive report on mental health challenges facing UK university students and digital technology impact",
         },
         {
-          id: "res-4",
-          title: "Case Study: Reducing Medication Errors at Home",
+          id: "digital-wellness-guidelines-2024",
+          title: "Digital Wellness Guidelines",
           type: "document",
-          summary: "Analysis of successful medication management programs in home healthcare",
-          content:
-            "This case study examines how structured medication management protocols reduced errors by 60% in home healthcare settings...",
+          url: "https://www.commonsensemedia.org/digital-wellness",
+          summary: "Evidence-based strategies for maintaining digital wellness and healthy technology habits",
         },
       ],
       context: {
@@ -792,19 +790,18 @@ export default function EduMindAI() {
       type: "process_guidance",
       content:
         unconnectedConcepts.length > 0
-          ? `🔗 **Discussion Extension**: I noticed we discussed "${recentNodes[0]?.content.slice(0, 20)}...", which connects to "${unconnectedConcepts[0]?.name}". How might this concept apply to your home healthcare safety ranking?`
-          : `🌊 **Thought Development**: Let's build on our discussion. What evidence from the assigned readings supports the safety factors you've identified so far?`,
+          ? `🔗 **Discussion Extension**: I noticed we discussed "${recentNodes[0]?.content.slice(0, 20)}...", which connects to "${unconnectedConcepts[0]?.name}". How might this concept apply to your digital wellness ranking?`
+          : `🌊 **Thought Development**: Let's build on our discussion. What evidence from the assigned readings supports the health factors you've identified so far?`,
       timestamp: new Date(),
       priority: "medium",
       relatedKeywords: [],
       resources: [
         {
-          id: "res-1",
-          title: "Home Healthcare Safety Frameworks",
+          id: "who-screen-time-2023",
+          title: "WHO Recommendations on Screen Time",
           type: "document",
-          summary: "Evidence-based frameworks for ensuring patient safety in home care environments",
-          content:
-            "This document outlines various safety frameworks including medication management protocols, caregiver training standards, and emergency response procedures for home healthcare settings...",
+          url: "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+          summary: "World Health Organization guidelines on screen time limits and healthy digital habits for students",
         },
       ],
       context: {
@@ -1511,22 +1508,31 @@ export default function EduMindAI() {
                   <div>
                     <h5 className="text-sm font-medium mb-2 text-indigo-700">Assigned Readings</h5>
                     <div className="space-y-2">
-                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200">
+                      <div 
+                        className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
+                        onClick={() => window.open("https://www.who.int/news-room/fact-sheets/detail/physical-activity", "_blank")}
+                      >
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📚</div>
-                          <span className="text-indigo-800 hover:text-indigo-900">Chapter 7: Screen Time and Student Wellbeing</span>
+                          <span className="text-indigo-800 hover:text-indigo-900">WHO Guidelines: Screen Time and Student Wellbeing</span>
                         </div>
                       </div>
-                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200">
+                      <div 
+                        className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
+                        onClick={() => window.open("https://www.sleepfoundation.org/how-sleep-works/blue-light-and-sleep", "_blank")}
+                      >
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📊</div>
-                          <span className="text-indigo-800 hover:text-indigo-900">Research Article: Effects of Night-time Device Use on Sleep Quality</span>
+                          <span className="text-indigo-800 hover:text-indigo-900">Research Article: Effects of Blue Light on Sleep Quality</span>
                         </div>
                       </div>
-                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200">
+                      <div 
+                        className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
+                        onClick={() => window.open("https://www.advance-he.ac.uk/knowledge-hub/student-mental-health-and-wellbeing-insight-survey-2023", "_blank")}
+                      >
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📖</div>
-                          <span className="text-indigo-800 hover:text-indigo-900">Case Study: University Digital Detox Programs</span>
+                          <span className="text-indigo-800 hover:text-indigo-900">Case Study: UK Student Mental Health Report</span>
                         </div>
                       </div>
                     </div>
@@ -1668,12 +1674,22 @@ export default function EduMindAI() {
                                         <div className="space-y-2">
                                           <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
                                           <div className="flex flex-wrap gap-2">
-                                            <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm" 
+                                              className="text-xs h-8 bg-transparent"
+                                              onClick={() => window.open("https://www.who.int/news-room/fact-sheets/detail/physical-activity", "_blank")}
+                                            >
                                               <FileText className="w-4 h-4" />
                                               <span className="ml-1">WHO Recommendations on Screen Time</span>
                                               <ExternalLink className="w-3 h-3 ml-1" />
                                             </Button>
-                                            <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm" 
+                                              className="text-xs h-8 bg-transparent"
+                                              onClick={() => window.open("https://www.advance-he.ac.uk/knowledge-hub/student-mental-health-and-wellbeing-insight-survey-2023", "_blank")}
+                                            >
                                               <BookOpen className="w-4 h-4" />
                                               <span className="ml-1">UK Student Mental Health Report (2023)</span>
                                               <ExternalLink className="w-3 h-3 ml-1" />
@@ -1757,7 +1773,12 @@ export default function EduMindAI() {
                                         <div className="space-y-2">
                                           <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
                                           <div className="flex flex-wrap gap-2">
-                                            <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm" 
+                                              className="text-xs h-8 bg-transparent"
+                                              onClick={() => window.open("https://www.commonsensemedia.org/digital-wellness", "_blank")}
+                                            >
                                               <Globe className="w-4 h-4" />
                                               <span className="ml-1">Digital Wellness Guidelines</span>
                                               <ExternalLink className="w-3 h-3 ml-1" />
