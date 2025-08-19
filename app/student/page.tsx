@@ -342,7 +342,7 @@ export default function EduMindAI() {
       connectsTo: ["4", "2"],
     },
   ])
-  const [discussionTime, setDiscussionTime] = useState(550) // 9 minutes 10 seconds
+  const [discussionTime, setDiscussionTime] = useState(0) // Start from 0
   const [isDiscussionActive, setIsDiscussionActive] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({
