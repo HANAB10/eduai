@@ -384,6 +384,7 @@ export default function EduMindAI() {
       author: string
     }>
   >([])
+  const [activeTab, setActiveTab] = useState("guidance")
 
   // Initialize userQuestions with fixed timestamps on client side only
   useEffect(() => {
@@ -1115,6 +1116,8 @@ export default function EduMindAI() {
 
   const handleResourceClick = (resource: Resource) => {
     setSelectedResource(resource)
+    // Switch to resources tab automatically when a resource is clicked
+    setActiveTab("resources")
   }
 
   const identifyThoughtType = (content: string): Discussion["thoughtType"] => {
@@ -1563,7 +1566,7 @@ export default function EduMindAI() {
           <div className="col-span-6">
             <div className="h-full flex flex-col">
               <div className="pb-3 flex-shrink-0">
-                <Tabs defaultValue="guidance" className="w-full h-full flex flex-col">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                   <TabsList className="flex w-full justify-between border border-slate-200 bg-gray-50 rounded-md p-1">
                     <TabsTrigger value="guidance" className="flex-1 border border-slate-200 rounded-sm bg-white data-[state=active]:bg-blue-50 data-[state=active]:border-blue-300 px-2 py-1 text-sm mx-1">AI Guidance</TabsTrigger>
                     <TabsTrigger value="resources" className="flex-1 border border-slate-200 rounded-sm bg-white data-[state=active]:bg-blue-50 data-[state=active]:border-blue-300 px-2 py-1 text-sm mx-1">Resources</TabsTrigger>
