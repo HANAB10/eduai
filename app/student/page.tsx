@@ -1001,7 +1001,7 @@ export default function EduMindAI() {
   const extractConcepts = (content: string): string[] => {
     const conceptPatterns = [
       /medication|prescription|dosage|administration|compliance/g,
-      /caregiver|family|training|education|competency/g,
+      /caregiver|family|education|competency/g,
       /safety|risk|hazard|prevention|protocol/g,
       /emergency|response|communication|alert|monitoring/g,
       /infection|hygiene|sanitation|sterile|contamination/g,
@@ -1545,10 +1545,17 @@ export default function EduMindAI() {
                             },
                             {
                               id: "resource-2",
-                              name: "Notification Management",
-                              definition: "Strategies for controlling device alerts to reduce stress and improve focus",
+                              name: "UK Student Mental Health Report (2023)",
+                              definition: "Comprehensive report on mental health challenges facing UK university students",
                               type: "document",
-                              summary: "How to manage notifications effectively.",
+                              summary: "Latest research on student mental health trends.",
+                            },
+                            {
+                              id: "resource-3",
+                              name: "Digital Wellness Guidelines",
+                              definition: "Evidence-based strategies for maintaining digital wellness and healthy technology habits",
+                              type: "webpage",
+                              summary: "Comprehensive guide to digital wellness practices.",
                             },
                           ].map((resource) => (
                             <div
