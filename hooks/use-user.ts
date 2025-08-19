@@ -32,9 +32,9 @@ export function useUser() {
       // 如果没有存储的用户信息，使用假数据用于测试
       const fakeUser: User = {
         id: 'test-user-123',
-        first_name: '测试',
-        last_name: '学生',
-        email: 'test.student@university.edu',
+        first_name: 'Alice',
+        last_name: 'Chen',
+        email: 'alice.chen@university.edu',
         user_type: 'student',
         student_id: 'STU2024001'
       }
@@ -50,14 +50,14 @@ export function useUser() {
   }
 
   const getInitials = () => {
-    if (!user) return 'TS'
+    if (!user) return 'AC'
     const firstInitial = user.first_name?.charAt(0).toUpperCase() || ''
     const lastInitial = user.last_name?.charAt(0).toUpperCase() || ''
     return firstInitial + lastInitial
   }
 
   const getFullName = () => {
-    if (!user) return '测试学生'
+    if (!user) return 'Alice Chen'
     return `${user.first_name} ${user.last_name}`
   }
 
