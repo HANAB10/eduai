@@ -20,8 +20,7 @@ export function useVoiceCalibration() {
   const [recognizedSentence, setRecognizedSentence] = useState<string>('')
   
   const { user } = useUser()
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
   
   const startCalibration = async (): Promise<VoiceCalibrationResult | null> => {
     if (!user) {
@@ -31,106 +30,87 @@ export function useVoiceCalibration() {
     
     const userId = user.id
     const userName = `${user.first_name} ${user.last_name}`
+    
     try {
       setIsCalibrating(true)
       setError(null)
       setCountdown(10)
-      audioChunksRef.current = []
 
-      // 获取麦克风权限
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: {
-          sampleRate: 16000,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true
-        } 
-      })
-
-      // 创建录音器
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      })
-      mediaRecorderRef.current = mediaRecorder
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data)
-        }
+      // 模拟获取麦克风权限
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            sampleRate: 16000,
+            channelCount: 1,
+            echoCancellation: true,
+            noiseSuppression: true
+          } 
+        })
+        
+        // 立即停止音频流，我们只是为了获取权限
+        stream.getTracks().forEach(track => track.stop())
+      } catch (micError) {
+        setError('无法访问麦克风')
+        setIsCalibrating(false)
+        return null
       }
 
-      mediaRecorder.onstop = async () => {
-        try {
-          // 停止所有音频轨道
-          stream.getTracks().forEach(track => track.stop())
-
-          // 合并音频数据
-          const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
-          
-          // 发送到后端进行处理
-          const formData = new FormData()
-          formData.append('audio', audioBlob)
-          formData.append('userId', userId)
-          formData.append('userName', userName)
-
-          const response = await fetch('/api/voice/calibrate', {
-            method: 'POST',
-            body: formData
-          })
-
-          const result = await response.json()
-
-          if (result.success) {
-            setCalibrationComplete(true)
-            setRecognizedSentence(result.transcript || '')
-            setIsCalibrating(false)
-            return result
-          } else {
-            setError(result.error || 'Voice calibration failed')
-            setIsCalibrating(false)
-            return null
-          }
-        } catch (error) {
-          console.error('Error processing voice calibration:', error)
-          setError('Failed to process voice recording')
-          setIsCalibrating(false)
-          return null
-        }
-      }
-
-      // 开始录音
-      mediaRecorder.start()
-
-      // 倒计时
+      // 开始倒计时模拟录音
       const countdownInterval = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
             clearInterval(countdownInterval)
-            mediaRecorder.stop()
+            // 模拟录音完成处理
+            setTimeout(() => {
+              const mockTranscript = "Hello, this is my voice for the team-based learning discussion on home healthcare safety."
+              setRecognizedSentence(mockTranscript)
+              setCalibrationComplete(true)
+              setIsCalibrating(false)
+            }, 500)
             return 0
           }
           return prev - 1
         })
       }, 1000)
 
+      countdownIntervalRef.current = countdownInterval
+
+      // 返回模拟的成功结果
       return new Promise((resolve) => {
-        mediaRecorder.addEventListener('stop', () => {
-          // 结果将在 onstop 处理器中处理
-        })
+        setTimeout(() => {
+          const result: VoiceCalibrationResult = {
+            success: true,
+            userId,
+            userName,
+            transcript: "Hello, this is my voice for the team-based learning discussion on home healthcare safety.",
+            message: 'Voice calibration completed successfully'
+          }
+          resolve(result)
+        }, 10500) // 10秒倒计时 + 0.5秒处理时间
       })
 
     } catch (error) {
       console.error('Voice calibration error:', error)
-      setError('Failed to access microphone')
+      setError('语音校准失败')
       setIsCalibrating(false)
       return null
     }
+  }
+
+  const stopCalibration = () => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current)
+      countdownIntervalRef.current = null
+    }
+    setIsCalibrating(false)
+    setCountdown(0)
   }
 
   const resetCalibration = () => {
     setCalibrationComplete(false)
     setError(null)
     setCountdown(0)
+    setRecognizedSentence('')
   }
 
   return {
@@ -142,11 +122,7 @@ export function useVoiceCalibration() {
     recording: isCalibrating,
     calibrationError: error,
     startCalibration,
-    stopCalibration: () => {
-      if (mediaRecorderRef.current) {
-        mediaRecorderRef.current.stop()
-      }
-    },
+    stopCalibration,
     resetCalibration
   }
 }
