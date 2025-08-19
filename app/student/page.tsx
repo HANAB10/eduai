@@ -1655,21 +1655,43 @@ export default function EduMindAI() {
                                               variant="outline" 
                                               size="sm" 
                                               className="text-xs h-8 bg-transparent"
-                                              onClick={() => window.open("https://www.who.int/news-room/fact-sheets/detail/physical-activity", "_blank")}
+                                              onClick={() => {
+                                                const resource = getResourceById("who-screen-time-2023")
+                                                if (resource) {
+                                                  handleResourceClick({
+                                                    id: resource.id,
+                                                    title: resource.title,
+                                                    type: resource.type,
+                                                    url: resource.url,
+                                                    content: resource.content,
+                                                    summary: resource.summary,
+                                                  })
+                                                }
+                                              }}
                                             >
                                               <FileText className="w-4 h-4" />
                                               <span className="ml-1">WHO Recommendations on Screen Time</span>
-                                              <ExternalLink className="w-3 h-3 ml-1" />
                                             </Button>
                                             <Button 
                                               variant="outline" 
                                               size="sm" 
                                               className="text-xs h-8 bg-transparent"
-                                              onClick={() => window.open("https://www.advance-he.ac.uk/knowledge-hub/student-mental-health-and-wellbeing-insight-survey-2023", "_blank")}
+                                              onClick={() => {
+                                                const resource = getResourceById("uk-student-mental-health-2023")
+                                                if (resource) {
+                                                  handleResourceClick({
+                                                    id: resource.id,
+                                                    title: resource.title,
+                                                    type: resource.type,
+                                                    url: resource.url,
+                                                    content: resource.content,
+                                                    summary: resource.summary,
+                                                  })
+                                                }
+                                              }}
                                             >
                                               <BookOpen className="w-4 h-4" />
                                               <span className="ml-1">UK Student Mental Health Report (2023)</span>
-                                              <ExternalLink className="w-3 h-3 ml-1" />
                                             </Button>
                                           </div>
                                         </div>
@@ -1754,11 +1776,22 @@ export default function EduMindAI() {
                                               variant="outline" 
                                               size="sm" 
                                               className="text-xs h-8 bg-transparent"
-                                              onClick={() => window.open("https://www.commonsensemedia.org/digital-wellness", "_blank")}
+                                              onClick={() => {
+                                                const resource = getResourceById("digital-wellness-guidelines-2024")
+                                                if (resource) {
+                                                  handleResourceClick({
+                                                    id: resource.id,
+                                                    title: resource.title,
+                                                    type: resource.type,
+                                                    url: resource.url,
+                                                    content: resource.content,
+                                                    summary: resource.summary,
+                                                  })
+                                                }
+                                              }}
                                             >
                                               <Globe className="w-4 h-4" />
                                               <span className="ml-1">Digital Wellness Guidelines</span>
-                                              <ExternalLink className="w-3 h-3 ml-1" />
                                             </Button>
                                           </div>
                                         </div>
@@ -1817,7 +1850,6 @@ export default function EduMindAI() {
                                                   >
                                                     {getResourceIcon(resource.type)}
                                                     <span className="ml-1">{resource.title || resource.name}</span>
-                                                    <ExternalLink className="w-3 h-3 ml-1" />
                                                   </Button>
                                                 ))}
                                               </div>
