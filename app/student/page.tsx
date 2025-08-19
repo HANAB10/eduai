@@ -159,8 +159,8 @@ interface TeamMember {
 const teamMembers: TeamMember[] = [
   {
     id: "1",
-    name: "test1",
-    avatar: "T1",
+    name: "Alice Chen",
+    avatar: "AC",
     participationLevel: 85,
     lastSpoke: null,
     speakingTime: 0,
@@ -179,8 +179,8 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: "2",
-    name: "test2",
-    avatar: "T2",
+    name: "Marcus Johnson",
+    avatar: "MJ",
     participationLevel: 72,
     lastSpoke: null,
     speakingTime: 0,
@@ -199,8 +199,8 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: "3",
-    name: "test3",
-    avatar: "T3",
+    name: "Sarah Williams",
+    avatar: "SW",
     participationLevel: 92,
     lastSpoke: null,
     speakingTime: 0,
@@ -219,8 +219,8 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: "4",
-    name: "test4",
-    avatar: "T4",
+    name: "David Park",
+    avatar: "DP",
     participationLevel: 58,
     lastSpoke: null,
     speakingTime: 0,
@@ -276,7 +276,7 @@ export default function EduMindAI() {
   const [discussions, setDiscussions] = useState<Discussion[]>([
     {
       id: "1",
-      speaker: "test1",
+      speaker: "Alice Chen",
       content: "I think sleep disruption is the biggest challenge. When I use my phone before bed, it takes me much longer to fall asleep.",
       timestamp: new Date(Date.now() - 480000),
       quality: 4,
@@ -288,7 +288,7 @@ export default function EduMindAI() {
     },
     {
       id: "2", 
-      speaker: "test2",
+      speaker: "Marcus Johnson",
       content: "I agree about sleep, but I think notification stress is worse. Constant alerts make me anxious even when I'm trying to study.",
       timestamp: new Date(Date.now() - 420000),
       quality: 4,
@@ -300,7 +300,7 @@ export default function EduMindAI() {
     },
     {
       id: "3",
-      speaker: "test3", 
+      speaker: "Sarah Williams", 
       content: "Both are important, but what about concentration problems? I can't focus on reading for more than 10 minutes without checking my phone.",
       timestamp: new Date(Date.now() - 360000),
       quality: 3,
@@ -312,7 +312,7 @@ export default function EduMindAI() {
     },
     {
       id: "4",
-      speaker: "test4",
+      speaker: "David Park",
       content: "The research shows that blue light exposure before bed reduces melatonin production by up to 23%. That's why sleep should be ranked first.",
       timestamp: new Date(Date.now() - 300000),
       quality: 5,
@@ -324,8 +324,8 @@ export default function EduMindAI() {
     },
     {
       id: "5",
-      speaker: "test2",
-      content: "But test4, doesn't that ignore the psychological impact? Notification anxiety affects us even during the day, not just at bedtime.",
+      speaker: "Marcus Johnson",
+      content: "But David, doesn't that ignore the psychological impact? Notification anxiety affects us even during the day, not just at bedtime.",
       timestamp: new Date(Date.now() - 240000),
       quality: 4,
       keywords: ["psychological", "impact", "notification", "anxiety", "daytime"],
@@ -359,10 +359,10 @@ export default function EduMindAI() {
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
   const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const [memberSpeakingTimes, setMemberSpeakingTimes] = useState<Record<string, number>>({
-    "test1": 70,  // 1:10
-    "test2": 125, // 2:05  
-    "test3": 45,  // 0:45
-    "test4": 95,  // 1:35
+    "Alice Chen": 70,  // 1:10
+    "Marcus Johnson": 125, // 2:05  
+    "Sarah Williams": 45,  // 0:45
+    "David Park": 95,  // 1:35
   })
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [userQuestions, setUserQuestions] = useState<
@@ -377,25 +377,25 @@ export default function EduMindAI() {
       id: "1",
       content: "Is using a laptop late at night worse than using a phone in bed?",
       timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-      author: "test1"
+      author: "Alice Chen"
     },
     {
       id: "2", 
       content: "How much daily screen time becomes unhealthy for students?",
       timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-      author: "test2"
+      author: "Marcus Johnson"
     },
     {
       id: "3",
       content: "Do blue-light filters actually improve sleep?",
       timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-      author: "test3"
+      author: "Sarah Williams"
     },
     {
       id: "4",
       content: "Do weekend 'digital detox' programs improve concentration long-term?",
       timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-      author: "test4"
+      author: "David Park"
     }
   ])
   const [currentQuestionInput, setCurrentQuestionInput] = useState("")
