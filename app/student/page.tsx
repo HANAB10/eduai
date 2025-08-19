@@ -266,14 +266,75 @@ declare global {
 
 export default function EduMindAI() {
   const [isDiscussionActive, setIsDiscussionActive] = useState(false)
-  const [discussionTime, setDiscussionTime] = useState(0)
-  const [currentTopic, setCurrentTopic] = useState("Home Healthcare Management: Quality and Safety")
+  const [discussionTime, setDiscussionTime] = useState(550) // 9 minutes 10 seconds
+  const [currentTopic, setCurrentTopic] = useState("Technology and Student Health: Digital Wellness")
   const [tRATQuestion, setTRATQuestion] = useState(
-    "Based on the assigned readings and case studies, what are the three most critical factors for ensuring patient safety in home healthcare settings? Rank them in order of importance and justify your ranking with evidence from the literature and real-world examples.",
+    "Based on the assigned readings and your own experience, what are the three biggest challenges students face when trying to use phones and laptops without harming their health (e.g., stress, distractions, sleep problems)? Rank them in order of importance and justify your ranking with evidence and examples.",
   )
   const [isListening, setIsListening] = useState(false)
   const [silenceTime, setSilenceTime] = useState(0)
-  const [discussions, setDiscussions] = useState<Discussion[]>([])
+  const [discussions, setDiscussions] = useState<Discussion[]>([
+    {
+      id: "1",
+      speaker: "test1",
+      content: "I think sleep disruption is the biggest challenge. When I use my phone before bed, it takes me much longer to fall asleep.",
+      timestamp: new Date(Date.now() - 480000),
+      quality: 4,
+      keywords: ["sleep", "disruption", "phone", "bed"],
+      concepts: ["sleep disruption", "screen time", "bedtime habits"],
+      logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: true, hasCounterargument: false },
+      thoughtType: "answer",
+      connectsTo: []
+    },
+    {
+      id: "2", 
+      speaker: "test2",
+      content: "I agree about sleep, but I think notification stress is worse. Constant alerts make me anxious even when I'm trying to study.",
+      timestamp: new Date(Date.now() - 420000),
+      quality: 4,
+      keywords: ["notification", "stress", "alerts", "anxious", "study"],
+      concepts: ["notification stress", "anxiety", "concentration"],
+      logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: true, hasCounterargument: false },
+      thoughtType: "challenge",
+      connectsTo: ["1"]
+    },
+    {
+      id: "3",
+      speaker: "test3", 
+      content: "Both are important, but what about concentration problems? I can't focus on reading for more than 10 minutes without checking my phone.",
+      timestamp: new Date(Date.now() - 360000),
+      quality: 3,
+      keywords: ["concentration", "focus", "reading", "checking", "phone"],
+      concepts: ["concentration loss", "attention span", "digital distraction"],
+      logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: false, hasCounterargument: false },
+      thoughtType: "question",
+      connectsTo: ["1", "2"]
+    },
+    {
+      id: "4",
+      speaker: "test4",
+      content: "The research shows that blue light exposure before bed reduces melatonin production by up to 23%. That's why sleep should be ranked first.",
+      timestamp: new Date(Date.now() - 300000),
+      quality: 5,
+      keywords: ["research", "blue light", "melatonin", "production", "ranked"],
+      concepts: ["blue light", "melatonin", "sleep disruption", "research evidence"],
+      logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: true, hasCounterargument: false },
+      thoughtType: "answer",
+      connectsTo: ["1"]
+    },
+    {
+      id: "5",
+      speaker: "test2",
+      content: "But test4, doesn't that ignore the psychological impact? Notification anxiety affects us even during the day, not just at bedtime.",
+      timestamp: new Date(Date.now() - 240000),
+      quality: 4,
+      keywords: ["psychological", "impact", "notification", "anxiety", "daytime"],
+      concepts: ["psychological effects", "notification stress", "daily impact"],
+      logicalStructure: { hasEvidence: false, hasClaim: true, hasReasoning: true, hasCounterargument: true },
+      thoughtType: "challenge",
+      connectsTo: ["4", "2"]
+    }
+  ])
   const [thinkingNetwork, setThinkingNetwork] = useState<ThinkingNode[]>([])
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({
     concepts: [],
@@ -298,10 +359,10 @@ export default function EduMindAI() {
   const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
   const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const [memberSpeakingTimes, setMemberSpeakingTimes] = useState<Record<string, number>>({
-    "test1": 0,
-    "test2": 0,
-    "test3": 0,
-    "test4": 0,
+    "test1": 70,  // 1:10
+    "test2": 125, // 2:05  
+    "test3": 45,  // 0:45
+    "test4": 95,  // 1:35
   })
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [userQuestions, setUserQuestions] = useState<
@@ -311,7 +372,32 @@ export default function EduMindAI() {
       timestamp: Date
       author: string
     }>
-  >([])
+  >([
+    {
+      id: "1",
+      content: "Is using a laptop late at night worse than using a phone in bed?",
+      timestamp: new Date(Date.now() - 300000), // 5 minutes ago
+      author: "test1"
+    },
+    {
+      id: "2", 
+      content: "How much daily screen time becomes unhealthy for students?",
+      timestamp: new Date(Date.now() - 240000), // 4 minutes ago
+      author: "test2"
+    },
+    {
+      id: "3",
+      content: "Do blue-light filters actually improve sleep?",
+      timestamp: new Date(Date.now() - 180000), // 3 minutes ago
+      author: "test3"
+    },
+    {
+      id: "4",
+      content: "Do weekend 'digital detox' programs improve concentration long-term?",
+      timestamp: new Date(Date.now() - 120000), // 2 minutes ago
+      author: "test4"
+    }
+  ])
   const [currentQuestionInput, setCurrentQuestionInput] = useState("")
   const [newMessage, setNewMessage] = useState(""); // Assuming this state variable is used for the message input
   const [showAIFeedback, setShowAIFeedback] = useState(false)
@@ -1344,9 +1430,7 @@ export default function EduMindAI() {
                     <div className="bg-white p-3 rounded border border-yellow-100 shadow-sm">
                       <h5 className="text-xs font-medium mb-1 text-yellow-800">Current Focus</h5>
                       <p className="text-xs text-yellow-700">
-                        {discussionSummary.keyPoints.length > 0
-                          ? discussionSummary.keyPoints[discussionSummary.keyPoints.length - 1]
-                          : "Building initial arguments for home healthcare safety factor rankings"}
+                        Prioritizing sleep disruption vs. concentration loss vs. notification stress
                       </p>
                     </div>
                   </div>
@@ -1394,19 +1478,19 @@ export default function EduMindAI() {
                       <div className="bg-white p-2 rounded border border-indigo-100 text-xs ">
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📚</div>
-                          <span className="text-indigo-800">Chapter 12: Home Healthcare Quality Standards</span>
+                          <span className="text-indigo-800">Chapter 7: Screen Time and Student Wellbeing</span>
                         </div>
                       </div>
                       <div className="bg-white p-2 rounded border border-indigo-100 text-xs ">
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📊</div>
-                          <span className="text-indigo-800">Research Article: Patient Safety in Home Care Settings</span>
+                          <span className="text-indigo-800">Research Article: Effects of Night-time Device Use on Sleep Quality</span>
                         </div>
                       </div>
                       <div className="bg-white p-2 rounded border border-indigo-100 text-xs ">
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📖</div>
-                          <span className="text-indigo-800">Case Study: Technology Integration in Home Healthcare</span>
+                          <span className="text-indigo-800">Case Study: University Digital Detox Programs</span>
                         </div>
                       </div>
                     </div>
@@ -1421,7 +1505,10 @@ export default function EduMindAI() {
                             Resources will appear during discussion
                           </div>
                         ) : (
-                          knowledgeBase.concepts.slice(-5).map((concept, index) => (
+                          [
+                            { name: "Tips to Reduce Eye Strain", definition: "Evidence-based methods for minimizing digital eye strain during extended screen use" },
+                            { name: "Notification Management", definition: "Strategies for controlling device alerts to reduce stress and improve focus" }
+                          ].map((concept, index) => (
                             <div key={index} className="bg-white p-2 rounded border border-indigo-100 text-xs ">
                               <div className="flex items-start gap-2">
                                 <div className="text-indigo-600 mt-0.5">🤖</div>
@@ -1530,23 +1617,19 @@ export default function EduMindAI() {
                                   </div>
                                   <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
                                     <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      🎯 <strong>Discussion Starter</strong>: Welcome to your tRAT discussion on home
-                                      healthcare management! I'll help guide your conversation by asking probing
-                                      questions, providing relevant resources, and helping you build stronger arguments.
-                                      Let's begin by having each member share their initial ranking of the three most
-                                      critical safety factors.
+                                      🎯 <strong>Discussion Starter</strong>: Welcome to today's tRAT on healthy technology use. To start, what do you think are the biggest health-related challenges caused by using phones or laptops too much? Please share your top three and explain why, using readings or personal examples.
                                     </div>
                                     <div className="space-y-2">
                                       <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
                                       <div className="flex flex-wrap gap-2">
                                         <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
                                           <FileText className="w-4 h-4" />
-                                          <span className="ml-1">Home Care Safety Guidelines</span>
+                                          <span className="ml-1">WHO Recommendations on Screen Time</span>
                                           <ExternalLink className="w-3 h-3 ml-1" />
                                         </Button>
                                         <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
                                           <BookOpen className="w-4 h-4" />
-                                          <span className="ml-1">Patient Monitoring Technologies</span>
+                                          <span className="ml-1">UK Student Mental Health Report (2023)</span>
                                           <ExternalLink className="w-3 h-3 ml-1" />
                                         </Button>
                                       </div>
@@ -1569,10 +1652,7 @@ export default function EduMindAI() {
                                   </div>
                                   <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
                                     <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      🤔 <strong>Socratic Question</strong>: I notice you mentioned that "medication
-                                      management is the top priority." Can you think of situations where this might not
-                                      be the case? How do factors like patient mobility, family caregiver training, and
-                                      emergency response systems interact with medication safety?
+                                      🤔 <strong>Open Group Prompt</strong>: Some of you have highlighted sleep disruption as a main concern. Do others think that stress from constant notifications could be even more disruptive? Why or why not?
                                     </div>
                                   </div>
                                 </div>
@@ -1592,22 +1672,19 @@ export default function EduMindAI() {
                                   </div>
                                   <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
                                     <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      🔄 <strong>Knowledge Synthesis</strong>: Great discussion so far! I'm seeing
-                                      connections between three key themes: medication safety, caregiver competency, and
-                                      emergency preparedness. How do these factors work together to create a
-                                      comprehensive safety framework for home healthcare?
+                                      🔄 <strong>Knowledge Synthesis</strong>: So far you've identified three recurring themes: sleep, stress from notifications, and reduced concentration. How do these interact with each other? For example, does reducing screen time automatically improve wellbeing, or is the type of use more important?
                                     </div>
                                     <div className="space-y-2">
                                       <p className="text-xs font-medium text-gray-600">Related Concepts:</p>
                                       <div className="flex flex-wrap gap-1">
                                         <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">
-                                          Medication Management
+                                          Sleep Disruption
                                         </span>
                                         <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                                          Caregiver Training
+                                          Notification Stress
                                         </span>
                                         <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
-                                          Emergency Response
+                                          Concentration Loss
                                         </span>
                                       </div>
                                     </div>
@@ -1629,17 +1706,14 @@ export default function EduMindAI() {
                                   </div>
                                   <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
                                     <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      📚 <strong>Resource Provision</strong>: Based on your discussion about infection
-                                      control in home settings, I found some relevant research that might strengthen
-                                      your arguments. The studies show interesting patterns in how different safety
-                                      protocols work across various home healthcare scenarios.
+                                      📚 <strong>Resource Provision</strong>: Based on your discussion about digital wellness, I found some relevant research that might strengthen your arguments. The studies show interesting patterns in how different technology use habits affect student health and academic performance.
                                     </div>
                                     <div className="space-y-2">
                                       <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
                                       <div className="flex flex-wrap gap-2">
                                         <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
                                           <Globe className="w-4 h-4" />
-                                          <span className="ml-1">WHO Home Care Safety Standards</span>
+                                          <span className="ml-1">Digital Wellness Guidelines</span>
                                           <ExternalLink className="w-3 h-3 ml-1" />
                                         </Button>
                                       </div>
