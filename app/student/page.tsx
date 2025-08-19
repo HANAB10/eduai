@@ -4,38 +4,68 @@ import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import Link from "next/link"
 import { useUser } from "@/hooks/use-user"
 import {
-  User,
-  Users,
-  LogOut,
-  Lightbulb,
-  BookOpen,
-  Mic,
-  Play,
-  Pause,
-  Brain,
-  Network,
-  HelpCircle,
-  GitBranch,
-  Compass,
   Archive,
-  Puzzle,
+  BookOpen,
+  Brain,
+  Compass,
   ExternalLink,
   FileText,
+  GitBranch,
   Globe,
+  HelpCircle,
+  Lightbulb,
+  LogOut,
+  Mic,
+  Network,
+  Pause,
+  Play,
   Plus,
+  Puzzle,
+  Square,
   User as UserIcon,
-  Square, // Added for Stop Discussion button
+  Users,
 } from "lucide-react"
+import { useRealTimeTranscription } from "@/hooks/use-real-time-transcription"
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
 import { useVoiceCalibration } from "@/hooks/use-voice-calibration"
-import { useRealTimeTranscription } from "@/hooks/use-real-time-transcription"
+
+interface AIIntervention {
+  id: string
+  type:
+    | "socratic_question"
+    | "knowledge_synthesis"
+    | "logic_clarification"
+    | "resource_provision"
+    | "process_guidance"
+    | "summary_generation"
+  content: string
+  timestamp: Date
+  priority: "low" | "medium" | "high"
+  relatedKeywords: string[]
+  targetSpeaker?: string
+  followUpQuestions?: string[]
+  resources?: Array<{
+    id: string
+    title?: string
+    name?: string
+    type: "document" | "webpage" | "research" | "video"
+    url?: string
+    content?: string
+    summary: string
+    definition?: string
+  }>
+  context: {
+    triggerType: "silence" | "confusion" | "depth_needed" | "synthesis_time" | "knowledge_gap" | "user_message" | "logic_clarification" | "general" | "discussion_start"
+    relatedNodes: string[]
+  }
+}
 
 interface Discussion {
   id: string
@@ -55,19 +85,13 @@ interface Discussion {
   connectsTo: string[]
 }
 
-interface ThinkingNode {
-  id: string
-  type: "concept" | "question" | "insight" | "connection" | "conclusion"
-  content: string
-  position: { x: number; y: number }
-  connections: Array<{
-    to: string
-    type: "leads_to" | "supports" | "contradicts" | "explains" | "examples"
-    strength: number
-  }>
-  discussionIds: string[]
-  timestamp: Date
-  importance: number
+interface DiscussionSummary {
+  phase: string
+  keyPoints: string[]
+  unresolved: string[]
+  insights: string[]
+  nextSteps: string[]
+  knowledgeGaps: string[]
 }
 
 interface KnowledgeBase {
@@ -96,42 +120,23 @@ interface KnowledgeBase {
   }>
 }
 
-interface AIIntervention {
+interface Message {
   id: string
-  type:
-    | "socratic_question"
-    | "knowledge_synthesis"
-    | "logic_clarification"
-    | "resource_provision"
-    | "process_guidance"
-    | "summary_generation"
+  type: "user_message" | "ai_message" | "system_message"
   content: string
   timestamp: Date
-  priority: "low" | "medium" | "high"
-  relatedKeywords: string[]
-  targetSpeaker?: string
-  followUpQuestions?: string[]
-  resources?: Array<{
-    id: string
-    title: string
-    type: "document" | "webpage" | "research" | "video"
-    url?: string
-    content?: string
-    summary: string
-  }>
-  context: {
-    triggerType: "silence" | "confusion" | "depth_needed" | "synthesis_time" | "knowledge_gap" | "user_message" | "logic_clarification" | "general" | "discussion_start"
-    relatedNodes: string[]
-  }
+  author: string // e.g., "Alice", "AI Assistant", "You"
 }
 
-interface DiscussionSummary {
-  phase: string
-  keyPoints: string[]
-  unresolved: string[]
-  insights: string[]
-  nextSteps: string[]
-  knowledgeGaps: string[]
+interface Resource {
+  id: string
+  name?: string
+  title?: string
+  type: "document" | "webpage" | "research" | "video"
+  url?: string
+  content?: string
+  summary: string
+  definition?: string
 }
 
 interface TeamMember {
@@ -155,6 +160,28 @@ interface TeamMember {
   }
 }
 
+interface ThinkingNode {
+  id: string
+  type: "concept" | "question" | "insight" | "connection" | "conclusion"
+  content: string
+  position: { x: number; y: number }
+  connections: Array<{
+    to: string
+    type: "leads_to" | "supports" | "contradicts" | "explains" | "examples"
+    strength: number
+  }>
+  discussionIds: string[]
+  timestamp: Date
+  importance: number
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: any
+    webkitSpeechRecognition: any
+  }
+}
+
 // Team members data
 const teamMembers: TeamMember[] = [
   {
@@ -168,14 +195,14 @@ const teamMembers: TeamMember[] = [
       analytical: 80,
       creative: 70,
       critical: 90,
-      practical: 65
+      practical: 65,
     },
     contributionTypes: {
       questions: 0,
       examples: 0,
       theories: 0,
-      challenges: 0
-    }
+      challenges: 0,
+    },
   },
   {
     id: "2",
@@ -188,14 +215,14 @@ const teamMembers: TeamMember[] = [
       analytical: 60,
       creative: 85,
       critical: 70,
-      practical: 80
+      practical: 80,
     },
     contributionTypes: {
       questions: 0,
       examples: 0,
       theories: 0,
-      challenges: 0
-    }
+      challenges: 0,
+    },
   },
   {
     id: "3",
@@ -208,14 +235,14 @@ const teamMembers: TeamMember[] = [
       analytical: 95,
       creative: 75,
       critical: 85,
-      practical: 90
+      practical: 90,
     },
     contributionTypes: {
       questions: 0,
       examples: 0,
       theories: 0,
-      challenges: 0
-    }
+      challenges: 0,
+    },
   },
   {
     id: "4",
@@ -228,51 +255,31 @@ const teamMembers: TeamMember[] = [
       analytical: 70,
       creative: 60,
       critical: 65,
-      practical: 85
+      practical: 85,
     },
     contributionTypes: {
       questions: 0,
       examples: 0,
       theories: 0,
-      challenges: 0
-    }
-  }
+      challenges: 0,
+    },
+  },
 ]
 
-interface Resource {
-  id: string
-  title: string
-  type: "document" | "webpage" | "research" | "video"
-  url?: string
-  content?: string
-  summary: string
-}
-
-// Interface for messages within the discussion
-interface Message {
-  id: string
-  type: "user_message" | "ai_message" | "system_message"
-  content: string
-  timestamp: Date
-  author: string // e.g., "Alice", "AI Assistant", "You"
-}
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition: any
-    SpeechRecognition: any
-  }
-}
-
 export default function EduMindAI() {
-  const [isDiscussionActive, setIsDiscussionActive] = useState(false)
-  const [discussionTime, setDiscussionTime] = useState(550) // 9 minutes 10 seconds
+  const [aiActiveMode, setAiActiveMode] = useState(true)
+  const [aiInterventions, setAiInterventions] = useState<AIIntervention[]>([])
+  const [currentQuestionInput, setCurrentQuestionInput] = useState("")
   const [currentTopic, setCurrentTopic] = useState("Technology and Student Health: Digital Wellness")
-  const [tRATQuestion, setTRATQuestion] = useState(
-    "Based on the assigned readings and your own experience, what are the three biggest challenges students face when trying to use phones and laptops without harming their health (e.g., stress, distractions, sleep problems)? Rank them in order of importance and justify your ranking with evidence and examples.",
-  )
-  const [isListening, setIsListening] = useState(false)
-  const [silenceTime, setSilenceTime] = useState(0)
+  const [discussionPhase, setDiscussionPhase] = useState<"opening" | "exploration" | "deepening" | "synthesis">("opening")
+  const [discussionSummary, setDiscussionSummary] = useState<DiscussionSummary>({
+    phase: "opening",
+    keyPoints: [],
+    unresolved: [],
+    insights: [],
+    nextSteps: [],
+    knowledgeGaps: [],
+  })
   const [discussions, setDiscussions] = useState<Discussion[]>([
     {
       id: "1",
@@ -284,10 +291,10 @@ export default function EduMindAI() {
       concepts: ["sleep disruption", "screen time", "bedtime habits"],
       logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: true, hasCounterargument: false },
       thoughtType: "answer",
-      connectsTo: []
+      connectsTo: [],
     },
     {
-      id: "2", 
+      id: "2",
       speaker: "Marcus Johnson",
       content: "I agree about sleep, but I think notification stress is worse. Constant alerts make me anxious even when I'm trying to study.",
       timestamp: new Date(Date.now() - 420000),
@@ -296,11 +303,11 @@ export default function EduMindAI() {
       concepts: ["notification stress", "anxiety", "concentration"],
       logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: true, hasCounterargument: false },
       thoughtType: "challenge",
-      connectsTo: ["1"]
+      connectsTo: ["1"],
     },
     {
       id: "3",
-      speaker: "Sarah Williams", 
+      speaker: "Sarah Williams",
       content: "Both are important, but what about concentration problems? I can't focus on reading for more than 10 minutes without checking my phone.",
       timestamp: new Date(Date.now() - 360000),
       quality: 3,
@@ -308,7 +315,7 @@ export default function EduMindAI() {
       concepts: ["concentration loss", "attention span", "digital distraction"],
       logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: false, hasCounterargument: false },
       thoughtType: "question",
-      connectsTo: ["1", "2"]
+      connectsTo: ["1", "2"],
     },
     {
       id: "4",
@@ -320,7 +327,7 @@ export default function EduMindAI() {
       concepts: ["blue light", "melatonin", "sleep disruption", "research evidence"],
       logicalStructure: { hasEvidence: true, hasClaim: true, hasReasoning: true, hasCounterargument: false },
       thoughtType: "answer",
-      connectsTo: ["1"]
+      connectsTo: ["1"],
     },
     {
       id: "5",
@@ -332,39 +339,42 @@ export default function EduMindAI() {
       concepts: ["psychological effects", "notification stress", "daily impact"],
       logicalStructure: { hasEvidence: false, hasClaim: true, hasReasoning: true, hasCounterargument: true },
       thoughtType: "challenge",
-      connectsTo: ["4", "2"]
-    }
+      connectsTo: ["4", "2"],
+    },
   ])
-  const [thinkingNetwork, setThinkingNetwork] = useState<ThinkingNode[]>([])
+  const [discussionTime, setDiscussionTime] = useState(550) // 9 minutes 10 seconds
+  const [isDiscussionActive, setIsDiscussionActive] = useState(false)
+  const [isListening, setIsListening] = useState(false)
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({
     concepts: [],
     relationships: [],
     insights: [],
   })
-  const [aiInterventions, setAiInterventions] = useState<AIIntervention[]>([])
-  const [discussionSummary, setDiscussionSummary] = useState<DiscussionSummary>({
-    phase: "opening",
-    keyPoints: [],
-    unresolved: [],
-    insights: [],
-    nextSteps: [],
-    knowledgeGaps: [],
-  })
-  const [discussionPhase, setDiscussionPhase] = useState<"opening" | "exploration" | "deepening" | "synthesis">(
-    "opening",
-  )
-  const [aiActiveMode, setAiActiveMode] = useState(true)
-  const recognitionRef = useRef<any>(null)
-  const [isVoiceCalibrating, setIsVoiceCalibrating] = useState(false)
-  const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
-  const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const [memberSpeakingTimes, setMemberSpeakingTimes] = useState<Record<string, number>>({
-    "Alice Chen": 70,  // 1:10
-    "Marcus Johnson": 125, // 2:05  
-    "Sarah Williams": 45,  // 0:45
-    "David Park": 95,  // 1:35
+    "Alice Chen": 70, // 1:10
+    "Marcus Johnson": 125, // 2:05
+    "Sarah Williams": 45, // 0:45
+    "David Park": 95, // 1:35
   })
-  const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
+  const [newMessage, setNewMessage] = useState("") // Assuming this state variable is used for the message input
+  const [newDiscussion, setNewDiscussion] = useState("")
+  const [possibleInterventions, setPossibleInterventions] = useState<AIIntervention[]>([])
+  const [selectedResource, setSelectedResource] = useState<{
+    id: string
+    name?: string
+    title?: string
+    type: "document" | "webpage" | "research" | "video"
+    url?: string
+    content?: string
+    summary: string
+    definition?: string
+  } | null>(null)
+  const [silenceTime, setSilenceTime] = useState(0)
+  const [showAIFeedback, setShowAIFeedback] = useState(false)
+  const [tRATQuestion, setTRATQuestion] = useState(
+    "Based on the assigned readings and your own experience, what are the three biggest challenges students face when trying to use phones and laptops without harming their health (e.g., stress, distractions, sleep problems)? Rank them in order of importance and justify your ranking with evidence and examples.",
+  )
+  const [thinkingNetwork, setThinkingNetwork] = useState<ThinkingNode[]>([])
   const [userQuestions, setUserQuestions] = useState<
     Array<{
       id: string
@@ -377,30 +387,29 @@ export default function EduMindAI() {
       id: "1",
       content: "Is using a laptop late at night worse than using a phone in bed?",
       timestamp: new Date(Date.now() - 300000), // 5 minutes ago
-      author: "Alice Chen"
+      author: "Alice Chen",
     },
     {
-      id: "2", 
+      id: "2",
       content: "How much daily screen time becomes unhealthy for students?",
       timestamp: new Date(Date.now() - 240000), // 4 minutes ago
-      author: "Marcus Johnson"
+      author: "Marcus Johnson",
     },
     {
       id: "3",
       content: "Do blue-light filters actually improve sleep?",
       timestamp: new Date(Date.now() - 180000), // 3 minutes ago
-      author: "Sarah Williams"
+      author: "Sarah Williams",
     },
     {
       id: "4",
       content: "Do weekend 'digital detox' programs improve concentration long-term?",
       timestamp: new Date(Date.now() - 120000), // 2 minutes ago
-      author: "David Park"
-    }
+      author: "David Park",
+    },
   ])
-  const [currentQuestionInput, setCurrentQuestionInput] = useState("")
-  const [newMessage, setNewMessage] = useState(""); // Assuming this state variable is used for the message input
-  const [showAIFeedback, setShowAIFeedback] = useState(false)
+  const [voiceCalibrationComplete, setVoiceCalibrationComplete] = useState(false)
+  const [showVoiceCalibrationDialog, setShowVoiceCalibrationDialog] = useState(false) // Corrected state name
   const { user, loading, logout, getInitials, getFullName } = useUser() // Added user hook
 
   // Hooks for voice calibration and transcription
@@ -413,83 +422,14 @@ export default function EduMindAI() {
     countdown,
     calibrationError,
     recognizedSentence,
-  } = useVoiceCalibration();
+  } = useVoiceCalibration()
 
   // Use the recognizedSentence from useVoiceCalibration hook for calibration
   useEffect(() => {
-    setVoiceCalibrationComplete(calibrationCompleteHook);
-  }, [calibrationCompleteHook]);
+    setVoiceCalibrationComplete(calibrationCompleteHook)
+  }, [calibrationCompleteHook])
 
-
-  const { transcripts, startTranscription, stopTranscription, speakerStats } = useRealTimeTranscription();
-
-  // Update discussion phase based on time
-  const currentPhase = (() => {
-    if (discussionTime < 300) return "opening"
-    if (discussionTime < 600) return "exploration"
-    if (discussionTime < 900) return "deepening"
-    return "synthesis"
-  })();
-
-  // Initialize speech recognition
-  useEffect(() => {
-    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
-      recognitionRef.current = new SpeechRecognition()
-      recognitionRef.current.continuous = true
-      recognitionRef.current.interimResults = true
-      recognitionRef.current.lang = 'en-US' // Set language to English
-
-      // Event handler for results
-      recognitionRef.current.onresult = (event: any) => {
-        let interimTranscript = ''
-        let finalTranscript = ''
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript
-          } else {
-            interimTranscript += event.results[i][0].transcript
-          }
-        }
-
-        if (finalTranscript) {
-          // Process final transcript
-          handleSpeechResult(finalTranscript)
-        } else if (interimTranscript && isListening) {
-          // Handle interim results if needed, e.g., for display
-          console.log('Interim:', interimTranscript)
-        }
-      }
-
-      recognitionRef.current.onerror = (event: any) => {
-        console.error("Speech recognition error:", event.error)
-        setIsListening(false)
-        // Handle specific errors, e.g., 'no-speech' or 'not-allowed'
-        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-          alert('Microphone permission not granted. Please allow microphone access in your browser settings.')
-        } else if (event.error === 'no-speech') {
-          console.log('No speech detected.')
-        }
-      }
-
-      recognitionRef.current.onend = () => {
-        console.log('Speech recognition ended.')
-        setIsListening(false)
-        // If the discussion is active and recognition stops unexpectedly, try to restart it
-        if (isDiscussionActive) {
-          // Add a small delay before attempting to restart
-          setTimeout(() => {
-            if (isListening) { // Only restart if we are supposed to be listening
-              console.log('Attempting to restart recognition after unexpected end.')
-              recognitionRef.current.start()
-            }
-          }, 1000)
-        }
-      }
-    } else {
-      console.error("Speech recognition not supported in this browser.")
-    }
-  }, [isListening, isDiscussionActive]) // Re-run if isListening or isDiscussionActive changes
+  const { transcripts, startTranscription, stopTranscription, speakerStats } = useRealTimeTranscription()
 
   // AI comprehensive intelligent system
   useEffect(() => {
@@ -523,7 +463,8 @@ export default function EduMindAI() {
   // Intelligent silence detection
   useEffect(() => {
     let silenceInterval: any
-    if (isDiscussionActive && !isListening && transcripts.length === 0) { // Only trigger silence if not actively listening and no transcripts
+    if (isDiscussionActive && !isListening && transcripts.length === 0) {
+      // Only trigger silence if not actively listening and no transcripts
       silenceInterval = setInterval(() => {
         setSilenceTime((prev) => {
           const newTime = prev + 1
@@ -549,45 +490,390 @@ export default function EduMindAI() {
     }
   }
 
-  const identifyThoughtType = (content: string): Discussion["thoughtType"] => {
-    if (content.includes("?") || content.includes("why") || content.includes("how")) {
-      return "question"
+  const analyzeDiscussionQuality = (content: string, logicalStructure?: any): number => {
+    let score = 2
+
+    if (logicalStructure) {
+      if (logicalStructure.hasEvidence) score += 1
+      if (logicalStructure.hasClaim) score += 1
+      if (logicalStructure.hasReasoning) score += 1
+      if (logicalStructure.hasCounterargument) score += 1
     }
-    if (content.includes("for example") || content.includes("such as") || content.includes("case")) {
-      return "example"
-    }
-    if (content.includes("theory") || content.includes("model") || content.includes("framework")) {
-      return "theory"
-    }
-    if (content.includes("but") || content.includes("however") || content.includes("challenge")) {
-      return "challenge"
-    }
-    if (content.includes("summary") || content.includes("synthesis") || content.includes("integration")) {
-      return "synthesis"
-    }
-    return "answer"
+
+    if (content.length > 30) score += 0.5
+    if (content.includes("why") || content.includes("how")) score += 0.5
+
+    return Math.min(Math.round(score), 5)
   }
 
-  const extractConcepts = (content: string): string[] => {
-    const conceptPatterns = [
-      /medication|prescription|dosage|administration|compliance/g,
-      /caregiver|family|training|education|competency/g,
-      /safety|risk|hazard|prevention|protocol/g,
-      /emergency|response|communication|alert|monitoring/g,
-      /infection|hygiene|sanitation|sterile|contamination/g,
-      /technology|device|equipment|monitoring|telehealth/g,
-    ]
+  const decideAIIntervention = () => {
+    const recentQuality =
+      discussions.slice(-3).reduce((acc, d) => acc + d.quality, 0) / Math.max(discussions.slice(-3).length, 1)
+    const confusionIndicators = discussions.slice(-2).filter((d) => d.thoughtType === "question").length
 
-    const concepts: string[] = []
-    conceptPatterns.forEach((pattern) => {
-      const matches = content.match(pattern)
-      if (matches) {
-        concepts.push(...matches)
+    if (recentQuality < 3 && Math.random() > 0.7) {
+      generateContextualIntervention("depth_needed")
+    } else if (confusionIndicators > 1 && Math.random() > 0.8) {
+      generateContextualIntervention("logic_clarification")
+    } else if (discussions.length > 0 && discussions.length % 8 === 0) {
+      generateContextualIntervention("synthesis_time")
+    }
+  }
+
+  const findConnections = (content: string, existingDiscussions: Discussion[]): string[] => {
+    const connections: string[] = []
+    const contentKeywords = extractKeywords(content)
+
+    existingDiscussions.forEach((discussion) => {
+      const commonKeywords = discussion.keywords.filter((keyword) =>
+        contentKeywords.some((ck) => ck.includes(keyword) || keyword.includes(ck)),
+      )
+
+      if (commonKeywords.length > 0) {
+        connections.push(discussion.id)
       }
     })
 
-    return [...new Set(concepts)]
+    return connections.slice(-3)
   }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+  }
+
+  const generateAIFeedbackContent = () => {
+    const feedbackItems: Array<{
+      id: string
+      type: string
+      title: string
+      content: string
+      icon: string
+    }> = []
+
+    // Participation Balance Feedback
+    if (discussions.length > 0) {
+      const speakers = new Set(discussions.map((d) => d.speaker))
+      const participation = Array.from(speakers).map((speaker) => ({
+        speaker,
+        count: discussions.filter((d) => d.speaker === speaker).length,
+      }))
+      const maxContributions = Math.max(...participation.map((p) => p.count))
+      const minContributions = Math.min(...participation.map((p) => p.count))
+      const isUnbalanced = maxContributions - minContributions > 2
+
+      if (isUnbalanced) {
+        feedbackItems.push({
+          id: "participation-balance",
+          type: "analysis",
+          title: "Participation Balance",
+          content:
+            "The discussion showed some participation imbalances. Consider encouraging quieter members to share their perspectives in future discussions.",
+          icon: "⚖️",
+        })
+      }
+    }
+
+    // Evidence Quality Feedback
+    if (discussions.length > 0) {
+      const evidenceRate = discussions.filter((d) => d.logicalStructure.hasEvidence).length / discussions.length
+      if (evidenceRate < 0.4 && discussions.length > 3) {
+        feedbackItems.push({
+          id: "evidence-quality",
+          type: "suggestion",
+          title: "Evidence Integration",
+          content:
+            "Your team could strengthen arguments by connecting more points to the assigned readings and case studies. Consider referencing specific research findings and data.",
+          icon: "📚",
+        })
+      }
+    }
+
+    // Discussion Depth Analysis
+    if (discussions.length > 0) {
+      const avgQuality = discussions.reduce((sum, d) => sum + d.quality, 0) / discussions.length
+      if (avgQuality < 3 && discussions.length > 2) {
+        feedbackItems.push({
+          id: "discussion-depth",
+          type: "improvement",
+          title: "Discussion Depth",
+          content:
+            "The discussion could benefit from exploring the \"why\" and \"how\" behind your safety factor rankings. Consider asking probing questions and providing detailed justifications.",
+          icon: "🔍",
+        })
+      }
+    }
+
+    // Synthesis Encouragement
+    if (discussions.length > 0) {
+      const synthesisCount = discussions.filter((d) => d.thoughtType === "synthesis").length
+      if (discussions.length > 5 && synthesisCount === 0) {
+        feedbackItems.push({
+          id: "synthesis-opportunity",
+          type: "suggestion",
+          title: "Synthesis Opportunity",
+          content:
+            "Great discussions! Your team had rich conversations but could work on synthesizing different viewpoints into cohesive conclusions and action plans.",
+          icon: "🔄",
+        })
+      }
+    }
+
+    // Positive Reinforcement
+    if (discussions.length > 0) {
+      const highQualityDiscussions = discussions.filter((d) => d.quality >= 4).length
+      if (highQualityDiscussions > 0) {
+        feedbackItems.push({
+          id: "excellent-progress",
+          type: "praise",
+          title: "Excellent Progress",
+          content: `Outstanding work! I identified ${highQualityDiscussions} high-quality argument${highQualityDiscussions > 1 ? "s" : ""} with strong evidence and reasoning. Keep building on these insights!`,
+          icon: "⭐",
+        })
+      }
+    }
+
+    // Overall Performance Summary
+    if (discussions.length > 0) {
+      const totalSpeakingTime = (Object.values(memberSpeakingTimes) as number[]).reduce(
+        (sum: number, time: number) => sum + time,
+        0,
+      )
+      const avgSpeakingTime = totalSpeakingTime / teamMembers.length
+
+      feedbackItems.push({
+        id: "overall-summary",
+        type: "summary",
+        title: "Discussion Summary",
+        content: `Your team completed a ${Math.floor(discussionTime / 60)}-minute discussion with ${
+          discussions.length
+        } contributions across ${discussionPhase} phases. Key concepts discussed included: ${[
+          ...new Set(discussions.flatMap((d) => d.concepts)),
+        ]
+          .slice(0, 5)
+          .join(", ")}.`,
+        icon: "📊",
+      })
+    }
+
+    return feedbackItems
+  }
+
+  const generateContextualIntervention = (triggerType: string) => {
+    let intervention: AIIntervention
+
+    switch (triggerType) {
+      case "silence":
+        intervention = generateSilenceBreaker()
+        break
+      case "depth_needed":
+        intervention = generateDepthGuidance()
+        break
+      case "knowledge_gap":
+        intervention = generateKnowledgeSupport()
+        break
+      case "logic_clarification":
+        intervention = generateLogicClarification()
+        break
+      case "synthesis_time":
+        intervention = generateSynthesisGuidance()
+        break
+      default:
+        intervention = generateGeneralGuidance()
+    }
+
+    setAiInterventions((prev) => [...prev.slice(-6), intervention])
+  }
+
+  const generateDepthGuidance = (): AIIntervention => {
+    return {
+      id: Date.now().toString(),
+      type: "knowledge_synthesis",
+      content: `🎯 **Deeper Analysis**: This safety factor needs more depth. Can you connect it to specific protocols from the readings? What evidence supports ranking this factor above others?`,
+      timestamp: new Date(),
+      priority: "high",
+      relatedKeywords: [],
+      resources: [
+        {
+          id: "res-2",
+          title: "Patient Safety Metrics in Home Care",
+          type: "research",
+          summary: "Peer-reviewed research on measuring and improving patient safety outcomes in home healthcare",
+          content:
+            "Recent studies show that home healthcare safety requires different metrics and approaches compared to institutional care...",
+        },
+      ],
+      context: {
+        triggerType: "depth_needed",
+        relatedNodes: [],
+      },
+    }
+  }
+
+  const generateGeneralGuidance = (): AIIntervention => {
+    return {
+      id: Date.now().toString(),
+      type: "process_guidance",
+      content: `💭 **Discussion Guidance**: Great points! Consider exploring different perspectives on this issue. What would critics of this approach argue?`,
+      timestamp: new Date(),
+      priority: "low",
+      relatedKeywords: [],
+      context: {
+        triggerType: "general",
+        relatedNodes: [],
+      },
+    }
+  }
+
+  const generateKnowledgeSupport = (): AIIntervention => {
+    const relevantConcepts = knowledgeBase.concepts.slice(-2)
+    return {
+      id: Date.now().toString(),
+      type: "resource_provision",
+      content: `📚 **Resource Connection**: Based on your discussion, I found relevant materials about home healthcare safety protocols. Click on the resources to explore further evidence for your safety factor rankings.`,
+      timestamp: new Date(),
+      priority: "medium",
+      relatedKeywords: relevantConcepts.map((c) => c.name),
+      resources: [
+        {
+          id: "res-3",
+          title: "Technology Solutions for Home Patient Monitoring",
+          type: "webpage",
+          url: "https://example.com/home-monitoring-tech",
+          summary: "Interactive guide on implementing technology solutions for patient safety in home care",
+        },
+        {
+          id: "res-4",
+          title: "Case Study: Reducing Medication Errors at Home",
+          type: "document",
+          summary: "Analysis of successful medication management programs in home healthcare",
+          content:
+            "This case study examines how structured medication management protocols reduced errors by 60% in home healthcare settings...",
+        },
+      ],
+      context: {
+        triggerType: "knowledge_gap",
+        relatedNodes: [],
+      },
+    }
+  }
+
+  const generateLogicClarification = (): AIIntervention => {
+    return {
+      id: Date.now().toString(),
+      type: "logic_clarification",
+      content: `🧩 **Logic Check**: Let's organize this safety argument: What's your main claim about this safety factor? What evidence supports its ranking? Are there any counterarguments or competing priorities to consider?`,
+      timestamp: new Date(),
+      priority: "high",
+      relatedKeywords: [],
+      context: {
+        triggerType: "logic_clarification",
+        relatedNodes: [],
+      },
+    }
+  }
+
+  const generateSilenceBreaker = (): AIIntervention => {
+    const recentNodes = thinkingNetwork.slice(-3)
+    const unconnectedConcepts = knowledgeBase.concepts.filter(
+      (c) => !recentNodes.some((n) => n.content.includes(c.name)),
+    )
+
+    return {
+      id: Date.now().toString(),
+      type: "process_guidance",
+      content:
+        unconnectedConcepts.length > 0
+          ? `🔗 **Discussion Extension**: I noticed we discussed "${recentNodes[0]?.content.slice(0, 20)}...", which connects to "${unconnectedConcepts[0]?.name}". How might this concept apply to your home healthcare safety ranking?`
+          : `🌊 **Thought Development**: Let's build on our discussion. What evidence from the assigned readings supports the safety factors you've identified so far?`,
+      timestamp: new Date(),
+      priority: "medium",
+      relatedKeywords: [],
+      resources: [
+        {
+          id: "res-1",
+          title: "Home Healthcare Safety Frameworks",
+          type: "document",
+          summary: "Evidence-based frameworks for ensuring patient safety in home care environments",
+          content:
+            "This document outlines various safety frameworks including medication management protocols, caregiver training standards, and emergency response procedures for home healthcare settings...",
+        },
+      ],
+      context: {
+        triggerType: "silence",
+        relatedNodes: recentNodes.map((n) => n.id),
+      },
+    }
+  }
+
+  const generateSpeechRecognition = () => {
+    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+      const recognition = new SpeechRecognition()
+      recognition.continuous = true
+      recognition.interimResults = true
+      recognition.lang = "en-US" // Set language to English
+
+      recognition.onresult = (event: any) => {
+        let interimTranscript = ""
+        let finalTranscript = ""
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript
+          } else {
+            interimTranscript += event.results[i][0].transcript
+          }
+        }
+
+        if (finalTranscript) {
+          // Process final transcript
+          handleSpeechResult(finalTranscript)
+        } else if (interimTranscript && isListening) {
+          // Handle interim results if needed, e.g., for display
+          console.log("Interim:", interimTranscript)
+        }
+      }
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error)
+        setIsListening(false)
+        // Handle specific errors, e.g., 'no-speech' or 'not-allowed'
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          alert("Microphone permission not granted. Please allow microphone access in your browser settings.")
+        } else if (event.error === "no-speech") {
+          console.log("No speech detected.")
+        }
+      }
+
+      recognition.onend = () => {
+        console.log("Speech recognition ended.")
+        setIsListening(false)
+        // If the discussion is active and recognition stops unexpectedly, try to restart it
+        if (isDiscussionActive) {
+          // Add a small delay before attempting to restart
+          setTimeout(() => {
+            if (isListening) {
+              // Only restart if we are supposed to be listening
+              console.log("Attempting to restart recognition after unexpected end.")
+              recognition.start()
+            }
+          }, 1000)
+        }
+      }
+      return recognition
+    } else {
+      console.error("Speech recognition not supported in this browser.")
+      return null
+    }
+  }
+
+  const recognitionRef = useRef<any>(null) // Initialize ref for speech recognition
+
+  // Initialize speech recognition
+  useEffect(() => {
+    recognitionRef.current = generateSpeechRecognition()
+  }, []) // Empty dependency array to run only once on mount
 
   const handleSpeechResult = (transcript: string) => {
     const keywords = extractKeywords(transcript)
@@ -623,23 +909,6 @@ export default function EduMindAI() {
     setTimeout(() => {
       processNewDiscussion(newDiscussion)
     }, 1500)
-  }
-
-  const findConnections = (content: string, existingDiscussions: Discussion[]): string[] => {
-    const connections: string[] = []
-    const contentKeywords = extractKeywords(content)
-
-    existingDiscussions.forEach((discussion) => {
-      const commonKeywords = discussion.keywords.filter((keyword) =>
-        contentKeywords.some((ck) => ck.includes(keyword) || keyword.includes(ck)),
-      )
-
-      if (commonKeywords.length > 0) {
-        connections.push(discussion.id)
-      }
-    })
-
-    return connections.slice(-3)
   }
 
   const processNewDiscussion = (discussion: Discussion) => {
@@ -729,271 +998,242 @@ export default function EduMindAI() {
     return null
   }
 
-  const generateContextualIntervention = (triggerType: string) => {
-    let intervention: AIIntervention
+  const extractConcepts = (content: string): string[] => {
+    const conceptPatterns = [
+      /medication|prescription|dosage|administration|compliance/g,
+      /caregiver|family|training|education|competency/g,
+      /safety|risk|hazard|prevention|protocol/g,
+      /emergency|response|communication|alert|monitoring/g,
+      /infection|hygiene|sanitation|sterile|contamination/g,
+      /technology|device|equipment|monitoring|telehealth/g,
+    ]
 
-    switch (triggerType) {
-      case "silence":
-        intervention = generateSilenceBreaker()
-        break
-      case "depth_needed":
-        intervention = generateDepthGuidance()
-        break
-      case "knowledge_gap":
-        intervention = generateKnowledgeSupport()
-        break
-      case "logic_clarification":
-        intervention = generateLogicClarification()
-        break
-      case "synthesis_time":
-        intervention = generateSynthesisGuidance()
-        break
-      default:
-        intervention = generateGeneralGuidance()
-    }
+    const concepts: string[] = []
+    conceptPatterns.forEach((pattern) => {
+      const matches = content.match(pattern)
+      if (matches) {
+        concepts.push(...matches)
+      }
+    })
 
-    setAiInterventions((prev) => [...prev.slice(-6), intervention])
+    return [...new Set(concepts)]
   }
 
-  const generateSilenceBreaker = (): AIIntervention => {
-    const recentNodes = thinkingNetwork.slice(-3)
-    const unconnectedConcepts = knowledgeBase.concepts.filter(
-      (c) => !recentNodes.some((n) => n.content.includes(c.name)),
-    )
-
-    return {
-      id: Date.now().toString(),
-      type: "process_guidance",
-      content:
-        unconnectedConcepts.length > 0
-          ? `🔗 **Discussion Extension**: I noticed we discussed "${recentNodes[0]?.content.slice(0, 20)}...", which connects to "${unconnectedConcepts[0]?.name}". How might this concept apply to your home healthcare safety ranking?`
-          : `🌊 **Thought Development**: Let's build on our discussion. What evidence from the assigned readings supports the safety factors you've identified so far?`,
-      timestamp: new Date(),
-      priority: "medium",
-      relatedKeywords: [],
-      resources: [
-        {
-          id: "res-1",
-          title: "Home Healthcare Safety Frameworks",
-          type: "document",
-          summary: "Evidence-based frameworks for ensuring patient safety in home care environments",
-          content:
-            "This document outlines various safety frameworks including medication management protocols, caregiver training standards, and emergency response procedures for home healthcare settings...",
-        },
-      ],
-      context: {
-        triggerType: "silence",
-        relatedNodes: recentNodes.map((n) => n.id),
-      },
-    }
+  const extractKeywords = (text: string): string[] => {
+    const commonWords = [
+      "the",
+      "is",
+      "in",
+      "have",
+      "and",
+      "of",
+      "I",
+      "you",
+      "he",
+      "she",
+      "we",
+      "this",
+      "that",
+      "will",
+      "all",
+      "want",
+      "can",
+      "could",
+    ]
+    return text
+      .split(/[,.!?;\s]+/)
+      .filter((word) => word.length > 1 && !commonWords.includes(word.toLowerCase()))
+      .slice(0, 6)
   }
 
-  const generateDepthGuidance = (): AIIntervention => {
-    return {
-      id: Date.now().toString(),
-      type: "knowledge_synthesis",
-      content: `🎯 **Deeper Analysis**: This safety factor needs more depth. Can you connect it to specific protocols from the readings? What evidence supports ranking this factor above others?`,
-      timestamp: new Date(),
-      priority: "high",
-      relatedKeywords: [],
-      resources: [
-        {
-          id: "res-2",
-          title: "Patient Safety Metrics in Home Care",
-          type: "research",
-          summary: "Peer-reviewed research on measuring and improving patient safety outcomes in home healthcare",
-          content:
-            "Recent studies show that home healthcare safety requires different metrics and approaches compared to institutional care...",
-        },
-      ],
-      context: {
-        triggerType: "depth_needed",
-        relatedNodes: [],
-      },
+  const getInterventionIcon = (type: string) => {
+    const icons = {
+      socratic_question: <HelpCircle className="w-4 h-4 text-blue-600" />,
+      knowledge_synthesis: <Puzzle className="w-4 h-4 text-purple-600" />,
+      logic_clarification: <GitBranch className="w-4 h-4 text-orange-600" />,
+      resource_provision: <BookOpen className="w-4 h-4 text-green-600" />,
+      process_guidance: <Compass className="w-4 h-4 text-indigo-600" />,
+      summary_generation: <Archive className="w-4 h-4 text-gray-600" />,
     }
+    return icons[type as keyof typeof icons] || <Lightbulb className="w-4 h-4 text-yellow-600" />
   }
 
-  const generateKnowledgeSupport = (): AIIntervention => {
-    const relevantConcepts = knowledgeBase.concepts.slice(-2)
-    return {
-      id: Date.now().toString(),
-      type: "resource_provision",
-      content: `📚 **Resource Connection**: Based on your discussion, I found relevant materials about home healthcare safety protocols. Click on the resources to explore further evidence for your safety factor rankings.`,
-      timestamp: new Date(),
-      priority: "medium",
-      relatedKeywords: relevantConcepts.map((c) => c.name),
-      resources: [
-        {
-          id: "res-3",
-          title: "Technology Solutions for Home Patient Monitoring",
-          type: "webpage",
-          url: "https://example.com/home-monitoring-tech",
-          summary: "Interactive guide on implementing technology solutions for patient safety in home care",
-        },
-        {
-          id: "res-4",
-          title: "Case Study: Reducing Medication Errors at Home",
-          type: "document",
-          summary: "Analysis of successful medication management programs in home healthcare",
-          content:
-            "This case study examines how structured medication management protocols reduced errors by 60% in home healthcare settings...",
-        },
-      ],
-      context: {
-        triggerType: "knowledge_gap",
-        relatedNodes: [],
-      },
+  const getPhaseColor = (phase: string) => {
+    const colors = {
+      opening: "bg-green-100 text-green-800",
+      exploration: "bg-blue-100 text-blue-800",
+      deepening: "bg-orange-100 text-orange-800",
+      synthesis: "bg-purple-100 text-purple-800",
     }
+    return colors[phase as keyof typeof colors] || "bg-gray-100 text-gray-800"
   }
 
-  const generateLogicClarification = (): AIIntervention => {
-    return {
-      id: Date.now().toString(),
-      type: "logic_clarification",
-      content: `🧩 **Logic Check**: Let's organize this safety argument: What's your main claim about this safety factor? What evidence supports its ranking? Are there any counterarguments or competing priorities to consider?`,
-      timestamp: new Date(),
-      priority: "high",
-      relatedKeywords: [],
-      context: {
-        triggerType: "logic_clarification",
-        relatedNodes: [],
-      },
+  const getPhaseLabel = (phase: string) => {
+    const labels = {
+      opening: "Initial Arguments",
+      exploration: "Evidence Gathering",
+      deepening: "Critical Analysis",
+      synthesis: "Final Consensus",
     }
+    return labels[phase as keyof typeof labels] || phase
   }
 
-  const generateSynthesisGuidance = (): AIIntervention => {
-    const keyInsights = knowledgeBase.insights.slice(-3)
-    return {
-      id: Date.now().toString(),
-      type: "summary_generation",
-      content: `🔄 **Synthesis Time**: Let's synthesize what we've discussed about home healthcare safety. I've identified key insights: ${keyInsights.map((i) => i.content.slice(0, 30)).join("; ")}... How do these connect to create your final ranking of the three most critical safety factors?`,
-      timestamp: new Date(),
-      priority: "high",
-      relatedKeywords: [],
-      context: {
-        triggerType: "synthesis_time",
-        relatedNodes: [],
-      },
+  const getResourceIcon = (type: string) => {
+    const icons = {
+      document: <FileText className="w-4 h-4" />,
+      webpage: <Globe className="w-4 h-4" />,
+      research: <BookOpen className="w-4 h-4" />,
+      video: <Play className="w-4 h-4" />,
     }
+    return icons[type as keyof typeof icons] || <FileText className="w-4 h-4" />
   }
 
-  const generateGeneralGuidance = (): AIIntervention => {
-    return {
-      id: Date.now().toString(),
-      type: "process_guidance",
-      content: `💭 **Discussion Guidance**: Great points! Consider exploring different perspectives on this issue. What would critics of this approach argue?`,
-      timestamp: new Date(),
-      priority: "low",
-      relatedKeywords: [],
-      context: {
-        triggerType: "general",
-        relatedNodes: [],
-      },
-    }
-  }
-
-  const generateAIFeedbackContent = () => {
-    const feedbackItems: Array<{
-      id: string
-      type: string
-      title: string
-      content: string
-      icon: string
-    }> = []
-
-    // Participation Balance Feedback
-    if (discussions.length > 0) {
-      const speakers = new Set(discussions.map(d => d.speaker))
-      const participation = Array.from(speakers).map(speaker => ({
-        speaker,
-        count: discussions.filter(d => d.speaker === speaker).length
-      }))
-      const maxContributions = Math.max(...participation.map(p => p.count))
-      const minContributions = Math.min(...participation.map(p => p.count))
-      const isUnbalanced = maxContributions - minContributions > 2
-
-      if (isUnbalanced) {
-        feedbackItems.push({
-          id: 'participation-balance',
-          type: 'analysis',
-          title: 'Participation Balance',
-          content: 'The discussion showed some participation imbalances. Consider encouraging quieter members to share their perspectives in future discussions.',
-          icon: '⚖️'
-        })
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey && isDiscussionActive) {
+      e.preventDefault() // Prevent default Enter behavior (new line)
+      if (newMessage.trim()) {
+        const newDiscussion: Discussion = {
+          id: Date.now().toString(),
+          speaker: "You", // Assuming the user is 'You'
+          content: newMessage,
+          timestamp: new Date(),
+          quality: analyzeDiscussionQuality(newMessage, analyzeLogicalStructure(newMessage)),
+          keywords: extractKeywords(newMessage),
+          concepts: extractConcepts(newMessage),
+          logicalStructure: analyzeLogicalStructure(newMessage),
+          thoughtType: identifyThoughtType(newMessage),
+          connectsTo: findConnections(newMessage, discussions),
+        }
+        setDiscussions((prev) => [...prev, newDiscussion])
+        setNewMessage("") // Clear the input
+        processNewDiscussion(newDiscussion)
       }
     }
+  }
 
-    // Evidence Quality Feedback
-    if (discussions.length > 0) {
-      const evidenceRate = discussions.filter(d => d.logicalStructure.hasEvidence).length / discussions.length
-      if (evidenceRate < 0.4 && discussions.length > 3) {
-        feedbackItems.push({
-          id: 'evidence-quality',
-          type: 'suggestion',
-          title: 'Evidence Integration',
-          content: 'Your team could strengthen arguments by connecting more points to the assigned readings and case studies. Consider referencing specific research findings and data.',
-          icon: '📚'
+  const handleResourceClick = (resource: Resource) => {
+    setSelectedResource(resource)
+  }
+
+  const identifyThoughtType = (content: string): Discussion["thoughtType"] => {
+    if (content.includes("?") || content.includes("why") || content.includes("how")) {
+      return "question"
+    }
+    if (content.includes("for example") || content.includes("such as") || content.includes("case")) {
+      return "example"
+    }
+    if (content.includes("theory") || content.includes("model") || content.includes("framework")) {
+      return "theory"
+    }
+    if (content.includes("but") || content.includes("however") || content.includes("challenge")) {
+      return "challenge"
+    }
+    if (content.includes("summary") || content.includes("synthesis") || content.includes("integration")) {
+      return "synthesis"
+    }
+    return "answer"
+  }
+
+  const startDiscussion = async () => {
+    if (!voiceCalibrationComplete) {
+      alert("请先完成语音校准再开始讨论")
+      return
+    }
+
+    setIsDiscussionActive(true)
+    setIsListening(true)
+
+    try {
+      await startTranscription()
+      console.log("小组讨论开始，实时转录已启动")
+    } catch (error) {
+      console.error("Failed to start discussion:", error)
+      alert("启动语音识别失败，请重试")
+      setIsDiscussionActive(false)
+      setIsListening(false)
+    }
+  }
+
+  const stopDiscussion = async () => {
+    setIsDiscussionActive(false)
+    setIsListening(false)
+
+    try {
+      await stopTranscription()
+      console.log("小组讨论结束")
+    } catch (error) {
+      console.error("Failed to stop discussion:", error)
+    }
+  }
+
+  // Process new transcripts
+  useEffect(() => {
+    transcripts.forEach((transcript) => {
+      if (transcript.content.trim()) {
+        const logicalStructure = analyzeLogicalStructure(transcript.content)
+        const quality = analyzeDiscussionQuality(transcript.content, logicalStructure)
+        const newDiscussion: Discussion = {
+          id: transcript.id,
+          speaker: transcript.speaker || `User ${transcript.speakerId}`, // Use speaker name from transcription or fallback
+          content: transcript.content,
+          timestamp: transcript.timestamp,
+          quality: quality,
+          keywords: extractKeywords(transcript.content),
+          concepts: extractConcepts(transcript.content),
+          logicalStructure: logicalStructure,
+          thoughtType: identifyThoughtType(transcript.content),
+          connectsTo: findConnections(transcript.content, discussions),
+        }
+
+        setDiscussions((prev) => {
+          // Avoid duplicate entries
+          if (prev.find((d) => d.id === newDiscussion.id)) return prev
+          return [...prev, newDiscussion]
+        })
+
+        // Send to text analysis platform (simulated)
+        console.log("Sending to text analysis platform:", {
+          content: transcript.content,
+          speaker: transcript.speaker,
+          speakerId: transcript.speakerId,
+          timestamp: transcript.timestamp,
         })
       }
-    }
+    })
+  }, [transcripts, discussions]) // Dependencies include transcripts and current discussions
 
-    // Discussion Depth Analysis
-    if (discussions.length > 0) {
-      const avgQuality = discussions.reduce((sum, d) => sum + d.quality, 0) / discussions.length
-      if (avgQuality < 3 && discussions.length > 2) {
-        feedbackItems.push({
-          id: 'discussion-depth',
-          type: 'improvement',
-          title: 'Discussion Depth',
-          content: 'The discussion could benefit from exploring the "why" and "how" behind your safety factor rankings. Consider asking probing questions and providing detailed justifications.',
-          icon: '🔍'
-        })
+  const startVoiceCalibration = () => {
+    setShowVoiceCalibrationDialog(true)
+  }
+
+  const beginCalibration = async () => {
+    try {
+      const result = await startCalibration()
+      if (result?.success) {
+        console.log("语音校准成功:", result)
+        setTimeout(() => {
+          setShowVoiceCalibrationDialog(false)
+        }, 2000)
       }
+    } catch (error) {
+      console.error("语音校准失败:", error)
     }
+  }
 
-    // Synthesis Encouragement
-    if (discussions.length > 0) {
-      const synthesisCount = discussions.filter(d => d.thoughtType === "synthesis").length
-      if (discussions.length > 5 && synthesisCount === 0) {
-        feedbackItems.push({
-          id: 'synthesis-opportunity',
-          type: 'suggestion',
-          title: 'Synthesis Opportunity',
-          content: 'Great discussions! Your team had rich conversations but could work on synthesizing different viewpoints into cohesive conclusions and action plans.',
-          icon: '🔄'
-        })
-      }
+  // The beginVoiceRecording function from the original code is now managed by the useVoiceCalibration hook.
+  // We will use the hook's state and functions instead.
+
+  const stopDiscussionAndReset = () => {
+    stopDiscussion()
+    // Optionally reset other states here if needed when discussion ends
+  }
+
+  const toggleDiscussion = async () => {
+    if (!isDiscussionActive) {
+      await startDiscussion()
+    } else {
+      await stopDiscussion()
     }
-
-    // Positive Reinforcement
-    if (discussions.length > 0) {
-      const highQualityDiscussions = discussions.filter(d => d.quality >= 4).length
-      if (highQualityDiscussions > 0) {
-        feedbackItems.push({
-          id: 'excellent-progress',
-          type: 'praise',
-          title: 'Excellent Progress',
-          content: `Outstanding work! I identified ${highQualityDiscussions} high-quality argument${highQualityDiscussions > 1 ? 's' : ''} with strong evidence and reasoning. Keep building on these insights!`,
-          icon: '⭐'
-        })
-      }
-    }
-
-    // Overall Performance Summary
-    if (discussions.length > 0) {
-      const totalSpeakingTime = (Object.values(memberSpeakingTimes) as number[]).reduce((sum: number, time: number) => sum + time, 0)
-      const avgSpeakingTime = totalSpeakingTime / teamMembers.length
-
-      feedbackItems.push({
-        id: 'overall-summary',
-        type: 'summary',
-        title: 'Discussion Summary',
-        content: `Your team completed a ${Math.floor(discussionTime / 60)}-minute discussion with ${discussions.length} contributions across ${discussionPhase} phases. Key concepts discussed included: ${[...new Set(discussions.flatMap(d => d.concepts))].slice(0, 5).join(', ')}.`,
-        icon: '📊'
-      })
-    }
-
-    return feedbackItems
   }
 
   const updateKnowledgeBase = () => {
@@ -1057,234 +1297,25 @@ export default function EduMindAI() {
     })
   }
 
-  const decideAIIntervention = () => {
-    const recentQuality =
-      discussions.slice(-3).reduce((acc, d) => acc + d.quality, 0) / Math.max(discussions.slice(-3).length, 1)
-    const confusionIndicators = discussions.slice(-2).filter((d) => d.thoughtType === "question").length
-
-    if (recentQuality < 3 && Math.random() > 0.7) {
-      generateContextualIntervention("depth_needed")
-    } else if (confusionIndicators > 1 && Math.random() > 0.8) {
-      generateContextualIntervention("logic_clarification")
-    } else if (discussions.length > 0 && discussions.length % 8 === 0) {
-      generateContextualIntervention("synthesis_time")
-    }
-  }
-
-  const extractKeywords = (text: string): string[] => {
-    const commonWords = [
-      "the",
-      "is",
-      "in",
-      "have",
-      "and",
-      "of",
-      "I",
-      "you",
-      "he",
-      "she",
-      "we",
-      "this",
-      "that",
-      "will",
-      "all",
-      "want",
-      "can",
-      "could",
-    ]
-    return text
-      .split(/[,.!?;\s]+/)
-      .filter((word) => word.length > 1 && !commonWords.includes(word.toLowerCase()))
-      .slice(0, 6)
-  }
-
-  const analyzeDiscussionQuality = (content: string, logicalStructure?: any): number => {
-    let score = 2
-
-    if (logicalStructure) {
-      if (logicalStructure.hasEvidence) score += 1
-      if (logicalStructure.hasClaim) score += 1
-      if (logicalStructure.hasReasoning) score += 1
-      if (logicalStructure.hasCounterargument) score += 1
-    }
-
-    if (content.length > 30) score += 0.5
-    if (content.includes("why") || content.includes("how")) score += 0.5
-
-    return Math.min(Math.round(score), 5)
-  }
-
-  const toggleDiscussion = async () => {
-    if (!isDiscussionActive) {
-      await startDiscussion()
-    } else {
-      await stopDiscussion()
-    }
-  }
-
-  const startDiscussion = async () => {
-    if (!voiceCalibrationComplete) {
-      alert('请先完成语音校准再开始讨论')
-      return
-    }
-
-    setIsDiscussionActive(true)
-    setIsListening(true)
-
-    try {
-      await startTranscription()
-      console.log('小组讨论开始，实时转录已启动')
-    } catch (error) {
-      console.error('Failed to start discussion:', error)
-      alert('启动语音识别失败，请重试')
-      setIsDiscussionActive(false)
-      setIsListening(false)
-    }
-  }
-
-  const stopDiscussion = async () => {
-    setIsDiscussionActive(false)
-    setIsListening(false)
-
-    try {
-      await stopTranscription()
-      console.log('小组讨论结束')
-    } catch (error) {
-      console.error('Failed to stop discussion:', error)
-    }
-  }
-
-  // Process new transcripts
-  useEffect(() => {
-    transcripts.forEach(transcript => {
-      if (transcript.content.trim()) {
-        const logicalStructure = analyzeLogicalStructure(transcript.content)
-        const quality = analyzeDiscussionQuality(transcript.content, logicalStructure)
-        const newDiscussion: Discussion = {
-          id: transcript.id,
-          speaker: transcript.speaker || `User ${transcript.speakerId}`, // Use speaker name from transcription or fallback
-          content: transcript.content,
-          timestamp: transcript.timestamp,
-          quality: quality,
-          keywords: extractKeywords(transcript.content),
-          concepts: extractConcepts(transcript.content),
-          logicalStructure: logicalStructure,
-          thoughtType: identifyThoughtType(transcript.content),
-          connectsTo: findConnections(transcript.content, discussions),
-        }
-
-        setDiscussions((prev) => {
-          // Avoid duplicate entries
-          if (prev.find(d => d.id === newDiscussion.id)) return prev
-          return [...prev, newDiscussion]
-        })
-
-        // Send to text analysis platform (simulated)
-        console.log('Sending to text analysis platform:', {
-          content: transcript.content,
-          speaker: transcript.speaker,
-          speakerId: transcript.speakerId,
-          timestamp: transcript.timestamp
-        })
+  const sendUserMessage = () => {
+    if (newMessage.trim()) {
+      const newDiscussion: Discussion = {
+        id: Date.now().toString(),
+        speaker: "You",
+        content: newMessage,
+        timestamp: new Date(),
+        quality: analyzeDiscussionQuality(newMessage, analyzeLogicalStructure(newMessage)),
+        keywords: extractKeywords(newMessage),
+        concepts: extractConcepts(newMessage),
+        logicalStructure: analyzeLogicalStructure(newMessage),
+        thoughtType: identifyThoughtType(newMessage),
+        connectsTo: findConnections(newMessage, discussions),
       }
-    })
-  }, [transcripts, discussions]) // Dependencies include transcripts and current discussions
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
-  }
-
-  const getPhaseLabel = (phase: string) => {
-    const labels = {
-      opening: "Initial Arguments",
-      exploration: "Evidence Gathering",
-      deepening: "Critical Analysis",
-      synthesis: "Final Consensus",
-    }
-    return labels[phase as keyof typeof labels] || phase
-  }
-
-  const getPhaseColor = (phase: string) => {
-    const colors = {
-      opening: "bg-green-100 text-green-800",
-      exploration: "bg-blue-100 text-blue-800",
-      deepening: "bg-orange-100 text-orange-800",
-      synthesis: "bg-purple-100 text-purple-800",
-    }
-    return colors[phase as keyof typeof colors] || "bg-gray-100 text-gray-800"
-  }
-
-  const getInterventionIcon = (type: string) => {
-    const icons = {
-      socratic_question: <HelpCircle className="w-4 h-4 text-blue-600" />,
-      knowledge_synthesis: <Puzzle className="w-4 h-4 text-purple-600" />,
-      logic_clarification: <GitBranch className="w-4 h-4 text-orange-600" />,
-      resource_provision: <BookOpen className="w-4 h-4 text-green-600" />,
-      process_guidance: <Compass className="w-4 h-4 text-indigo-600" />,
-      summary_generation: <Archive className="w-4 h-4 text-gray-600" />,
-    }
-    return icons[type as keyof typeof icons] || <Lightbulb className="w-4 h-4 text-yellow-600" />
-  }
-
-  const startVoiceCalibration = () => {
-    setShowVoiceCalibrationDialog(true)
-  }
-
-  const beginCalibration = async () => {
-    try {
-      const result = await startCalibration()
-      if (result?.success) {
-        console.log('语音校准成功:', result)
-        setTimeout(() => {
-          setShowVoiceCalibrationDialog(false)
-        }, 2000)
-      }
-    } catch (error) {
-      console.error('语音校准失败:', error)
+      setDiscussions((prev) => [...prev, newDiscussion])
+      setNewMessage("")
+      processNewDiscussion(newDiscussion)
     }
   }
-
-  // The beginVoiceRecording function from the original code is now managed by the useVoiceCalibration hook.
-  // We will use the hook's state and functions instead.
-
-  const handleResourceClick = (resource: Resource) => {
-    setSelectedResource(resource)
-  }
-
-  const getResourceIcon = (type: string) => {
-    const icons = {
-      document: <FileText className="w-4 h-4" />,
-      webpage: <Globe className="w-4 h-4" />,
-      research: <BookOpen className="w-4 h-4" />,
-      video: <Play className="w-4 h-4" />,
-    }
-    return icons[type as keyof typeof icons] || <FileText className="w-4 h-4" />
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey && isDiscussionActive) {
-      e.preventDefault(); // Prevent default Enter behavior (new line)
-      if (newMessage.trim()) {
-        const newDiscussion: Discussion = {
-          id: Date.now().toString(),
-          speaker: "You", // Assuming the user is 'You'
-          content: newMessage,
-          timestamp: new Date(),
-          quality: analyzeDiscussionQuality(newMessage, analyzeLogicalStructure(newMessage)),
-          keywords: extractKeywords(newMessage),
-          concepts: extractConcepts(newMessage),
-          logicalStructure: analyzeLogicalStructure(newMessage),
-          thoughtType: identifyThoughtType(newMessage),
-          connectsTo: findConnections(newMessage, discussions),
-        };
-        setDiscussions((prev) => [...prev, newDiscussion]);
-        setNewMessage(""); // Clear the input
-        processNewDiscussion(newDiscussion);
-      }
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -1388,7 +1419,6 @@ export default function EduMindAI() {
                 <BookOpen className="w-4 h-4 text-slate-600" />
                 Course Topic
               </h3>
-
             </div>
             <p className="text-slate-800">{currentTopic}</p>
           </div>
@@ -1454,8 +1484,8 @@ export default function EduMindAI() {
                         <div className="text-center text-gray-500 text-xs">
                           Final summary will be generated when<br />
                           tRAT discussion ends
+                        </div>
                       </div>
-                  </div>
                     )}
                   </div>
                 </div>
@@ -1506,15 +1536,31 @@ export default function EduMindAI() {
                           </div>
                         ) : (
                           [
-                            { name: "Tips to Reduce Eye Strain", definition: "Evidence-based methods for minimizing digital eye strain during extended screen use" },
-                            { name: "Notification Management", definition: "Strategies for controlling device alerts to reduce stress and improve focus" }
-                          ].map((concept, index) => (
-                            <div key={index} className="bg-white p-2 rounded border border-indigo-100 text-xs ">
+                            {
+                              id: "resource-1",
+                              name: "Tips to Reduce Eye Strain",
+                              definition: "Evidence-based methods for minimizing digital eye strain during extended screen use",
+                              type: "document",
+                              summary: "General advice on eye strain reduction.",
+                            },
+                            {
+                              id: "resource-2",
+                              name: "Notification Management",
+                              definition: "Strategies for controlling device alerts to reduce stress and improve focus",
+                              type: "document",
+                              summary: "How to manage notifications effectively.",
+                            },
+                          ].map((resource) => (
+                            <div
+                              key={resource.id}
+                              className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 transition-colors"
+                              onClick={() => handleResourceClick(resource)}
+                            >
                               <div className="flex items-start gap-2">
                                 <div className="text-indigo-600 mt-0.5">🤖</div>
                                 <div>
-                                  <span className="font-medium text-indigo-800">{concept.name}:</span>
-                                  <span className="text-indigo-700"> {concept.definition.slice(0, 40)}...</span>
+                                  <span className="font-medium text-indigo-700 hover:text-indigo-800">{resource.name}</span>
+                                  <div className="text-gray-600 mt-1">{resource.definition}</div>
                                 </div>
                               </div>
                             </div>
@@ -1526,8 +1572,6 @@ export default function EduMindAI() {
                 </div>
               </CardContent>
             </Card>
-
-
           </div>
 
           {/* Center - AI Guidance & Resources */}
@@ -1601,190 +1645,190 @@ export default function EduMindAI() {
                           ) : (
                             <>
                               {aiInterventions.length === 0 ? (
-                            <div className="space-y-4 pr-4">
-                              {/* 示例AI干预 */}
-                              <div className="flex gap-3">
-                                <Avatar className="w-8 h-8 mt-1">
-                                  <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
-                                    <Brain className="w-4 h-4" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm text-indigo-600">Edu AI</span>
-                                    <span className="text-xs text-gray-500">Example</span>
-                                    <Compass className="w-4 h-4 text-indigo-600" />
-                                  </div>
-                                  <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
-                                    <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      🎯 <strong>Discussion Starter</strong>: Welcome to today's tRAT on healthy technology use. To start, what do you think are the biggest health-related challenges caused by using phones or laptops too much? Please share your top three and explain why, using readings or personal examples.
-                                    </div>
-                                    <div className="space-y-2">
-                                      <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
-                                      <div className="flex flex-wrap gap-2">
-                                        <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
-                                          <FileText className="w-4 h-4" />
-                                          <span className="ml-1">WHO Recommendations on Screen Time</span>
-                                          <ExternalLink className="w-3 h-3 ml-1" />
-                                        </Button>
-                                        <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
-                                          <BookOpen className="w-4 h-4" />
-                                          <span className="ml-1">UK Student Mental Health Report (2023)</span>
-                                          <ExternalLink className="w-3 h-3 ml-1" />
-                                        </Button>
+                                <div className="space-y-4 pr-4">
+                                  {/* 示例AI干预 */}
+                                  <div className="flex gap-3">
+                                    <Avatar className="w-8 h-8 mt-1">
+                                      <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
+                                        <Brain className="w-4 h-4" />
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-medium text-sm text-indigo-600">Edu AI</span>
+                                        <span className="text-xs text-gray-500">Example</span>
+                                        <Compass className="w-4 h-4 text-indigo-600" />
                                       </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex gap-3">
-                                <Avatar className="w-8 h-8 mt-1">
-                                  <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
-                                    <Brain className="w-4 h-4" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm text-indigo-600">Edu AI</span>
-                                    <span className="text-xs text-gray-500">Example</span>
-                                    <HelpCircle className="w-4 h-4 text-blue-600" />
-                                  </div>
-                                  <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
-                                    <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      🤔 <strong>Open Group Prompt</strong>: Some of you have highlighted sleep disruption as a main concern. Do others think that stress from constant notifications could be even more disruptive? Why or why not?
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex gap-3">
-                                <Avatar className="w-8 h-8 mt-1">
-                                  <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
-                                    <Brain className="w-4 h-4" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm text-indigo-600">Edu AI</span>
-                                    <span className="text-xs text-gray-500">Example</span>
-                                    <Puzzle className="w-4 h-4 text-purple-600" />
-                                  </div>
-                                  <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
-                                    <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      🔄 <strong>Knowledge Synthesis</strong>: So far you've identified three recurring themes: sleep, stress from notifications, and reduced concentration. How do these interact with each other? For example, does reducing screen time automatically improve wellbeing, or is the type of use more important?
-                                    </div>
-                                    <div className="space-y-2">
-                                      <p className="text-xs font-medium text-gray-600">Related Concepts:</p>
-                                      <div className="flex flex-wrap gap-1">
-                                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">
-                                          Sleep Disruption
-                                        </span>
-                                        <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
-                                          Notification Stress
-                                        </span>
-                                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
-                                          Concentration Loss
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex gap-3">
-                                <Avatar className="w-8 h-8 mt-1">
-                                  <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
-                                    <Brain className="w-4 h-4" />
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm text-indigo-600">Edu AI</span>
-                                    <span className="text-xs text-gray-500">Example</span>
-                                    <BookOpen className="w-4 h-4 text-green-600" />
-                                  </div>
-                                  <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
-                                    <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                      📚 <strong>Resource Provision</strong>: Based on your discussion about digital wellness, I found some relevant research that might strengthen your arguments. The studies show interesting patterns in how different technology use habits affect student health and academic performance.
-                                    </div>
-                                    <div className="space-y-2">
-                                      <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
-                                      <div className="flex flex-wrap gap-2">
-                                        <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
-                                          <Globe className="w-4 h-4" />
-                                          <span className="ml-1">Digital Wellness Guidelines</span>
-                                          <ExternalLink className="w-3 h-3 ml-1" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="text-center py-4 border-t">
-                                <p className="text-sm text-gray-500">
-                                  These are examples of how I'll guide your discussion. Start the tRAT discussion to see
-                                  real-time AI assistance!
-                                </p>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              {aiInterventions.map((intervention, index) => (
-                                <div key={intervention.id} className="flex gap-3">
-                                  <Avatar className="w-8 h-8 mt-1">
-                                    <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
-                                      <Brain className="w-4 h-4" />
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="font-medium text-sm text-indigo-600">Edu AI</span>
-                                      <span className="text-xs text-gray-500">
-                                        {intervention.timestamp.toLocaleTimeString()}
-                                      </span>
-                                      {getInterventionIcon(intervention.type)}
-                                    </div>
-                                    <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
-                                      <div className="text-sm text-gray-800 leading-relaxed mb-3">
-                                        {intervention.content.split("**").map((part, idx) =>
-                                          idx % 2 === 1 ? (
-                                            <strong key={idx} className="text-indigo-700">
-                                              {part}
-                                            </strong>
-                                          ) : (
-                                            part
-                                          ),
-                                        )}
-                                      </div>
-                                      {/* Resource buttons */}
-                                      {intervention.resources && intervention.resources.length > 0 && (
+                                      <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
+                                        <div className="text-sm text-gray-800 leading-relaxed mb-3">
+                                          🎯 <strong>Discussion Starter</strong>: Welcome to today's tRAT on healthy technology use. To start, what do you think are the biggest health-related challenges caused by using phones or laptops too much? Please share your top three and explain why, using readings or personal examples.
+                                        </div>
                                         <div className="space-y-2">
                                           <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
                                           <div className="flex flex-wrap gap-2">
-                                            {intervention.resources.map((resource) => (
-                                              <Button
-                                                key={resource.id}
-                                                variant="outline"
-                                                size="sm"
-                                                className="text-xs h-8 bg-transparent"
-                                                onClick={() => handleResourceClick(resource)}
-                                              >
-                                                {getResourceIcon(resource.type)}
-                                                <span className="ml-1">{resource.title}</span>
-                                                <ExternalLink className="w-3 h-3 ml-1" />
-                                              </Button>
-                                            ))}
+                                            <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
+                                              <FileText className="w-4 h-4" />
+                                              <span className="ml-1">WHO Recommendations on Screen Time</span>
+                                              <ExternalLink className="w-3 h-3 ml-1" />
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
+                                              <BookOpen className="w-4 h-4" />
+                                              <span className="ml-1">UK Student Mental Health Report (2023)</span>
+                                              <ExternalLink className="w-3 h-3 ml-1" />
+                                            </Button>
                                           </div>
                                         </div>
-                                      )}
+                                      </div>
                                     </div>
                                   </div>
+
+                                  <div className="flex gap-3">
+                                    <Avatar className="w-8 h-8 mt-1">
+                                      <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
+                                        <Brain className="w-4 h-4" />
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-medium text-sm text-indigo-600">Edu AI</span>
+                                        <span className="text-xs text-gray-500">Example</span>
+                                        <HelpCircle className="w-4 h-4 text-blue-600" />
+                                      </div>
+                                      <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
+                                        <div className="text-sm text-gray-800 leading-relaxed mb-3">
+                                          🤔 <strong>Open Group Prompt</strong>: Some of you have highlighted sleep disruption as a main concern. Do others think that stress from constant notifications could be even more disruptive? Why or why not?
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex gap-3">
+                                    <Avatar className="w-8 h-8 mt-1">
+                                      <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
+                                        <Brain className="w-4 h-4" />
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-medium text-sm text-indigo-600">Edu AI</span>
+                                        <span className="text-xs text-gray-500">Example</span>
+                                        <Puzzle className="w-4 h-4 text-purple-600" />
+                                      </div>
+                                      <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
+                                        <div className="text-sm text-gray-800 leading-relaxed mb-3">
+                                          🔄 <strong>Knowledge Synthesis</strong>: So far you've identified three recurring themes: sleep, stress from notifications, and reduced concentration. How do these interact with each other? For example, does reducing screen time automatically improve wellbeing, or is the type of use more important?
+                                        </div>
+                                        <div className="space-y-2">
+                                          <p className="text-xs font-medium text-gray-600">Related Concepts:</p>
+                                          <div className="flex flex-wrap gap-1">
+                                            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">
+                                              Sleep Disruption
+                                            </span>
+                                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                                              Notification Stress
+                                            </span>
+                                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                                              Concentration Loss
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex gap-3">
+                                    <Avatar className="w-8 h-8 mt-1">
+                                      <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
+                                        <Brain className="w-4 h-4" />
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-medium text-sm text-indigo-600">Edu AI</span>
+                                        <span className="text-xs text-gray-500">Example</span>
+                                        <BookOpen className="w-4 h-4 text-green-600" />
+                                      </div>
+                                      <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
+                                        <div className="text-sm text-gray-800 leading-relaxed mb-3">
+                                          📚 <strong>Resource Provision</strong>: Based on your discussion about digital wellness, I found some relevant research that might strengthen your arguments. The studies show interesting patterns in how different technology use habits affect student health and academic performance.
+                                        </div>
+                                        <div className="space-y-2">
+                                          <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
+                                          <div className="flex flex-wrap gap-2">
+                                            <Button variant="outline" size="sm" className="text-xs h-8 bg-transparent">
+                                              <Globe className="w-4 h-4" />
+                                              <span className="ml-1">Digital Wellness Guidelines</span>
+                                              <ExternalLink className="w-3 h-3 ml-1" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="text-center py-4 border-t">
+                                    <p className="text-sm text-gray-500">
+                                      These are examples of how I'll guide your discussion. Start the tRAT discussion to see
+                                      real-time AI assistance!
+                                    </p>
+                                  </div>
                                 </div>
-                              ))}
-                            </>
-                          )}
+                              ) : (
+                                <>
+                                  {aiInterventions.map((intervention, index) => (
+                                    <div key={intervention.id} className="flex gap-3">
+                                      <Avatar className="w-8 h-8 mt-1">
+                                        <AvatarFallback className="text-xs bg-indigo-100 text-indigo-600">
+                                          <Brain className="w-4 h-4" />
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                          <span className="font-medium text-sm text-indigo-600">Edu AI</span>
+                                          <span className="text-xs text-gray-500">
+                                            {intervention.timestamp.toLocaleTimeString()}
+                                          </span>
+                                          {getInterventionIcon(intervention.type)}
+                                        </div>
+                                        <div className="rounded-lg p-3 border border-slate-200" style={{backgroundColor: '#F9FAFB'}}>
+                                          <div className="text-sm text-gray-800 leading-relaxed mb-3">
+                                            {intervention.content.split("**").map((part, idx) =>
+                                              idx % 2 === 1 ? (
+                                                <strong key={idx} className="text-indigo-700">
+                                                  {part}
+                                                </strong>
+                                              ) : (
+                                                part
+                                              ),
+                                            )}
+                                          </div>
+                                          {/* Resource buttons */}
+                                          {intervention.resources && intervention.resources.length > 0 && (
+                                            <div className="space-y-2">
+                                              <p className="text-xs font-medium text-gray-600">Suggested Resources:</p>
+                                              <div className="flex flex-wrap gap-2">
+                                                {intervention.resources.map((resource) => (
+                                                  <Button
+                                                    key={resource.id}
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="text-xs h-8 bg-transparent"
+                                                    onClick={() => handleResourceClick(resource)}
+                                                  >
+                                                    {getResourceIcon(resource.type)}
+                                                    <span className="ml-1">{resource.title || resource.name}</span>
+                                                    <ExternalLink className="w-3 h-3 ml-1" />
+                                                  </Button>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </>
+                              )}
                             </>
                           )}
                         </div>
@@ -1798,7 +1842,7 @@ export default function EduMindAI() {
                         <div className="h-full">
                           <div className="flex items-center gap-2 mb-4">
                             {getResourceIcon(selectedResource.type)}
-                            <h3 className="font-medium">{selectedResource.title}</h3>
+                            <h3 className="font-medium">{selectedResource.title || selectedResource.name}</h3>
                             <Button
                               variant="ghost"
                               size="sm"
