@@ -1203,7 +1203,7 @@ export default function EduMindAI() {
   }, [transcripts, discussions]) // Dependencies include transcripts and current discussions
 
   const startVoiceCalibration = () => {
-    // Removed user check for testing purposes
+    console.log("Opening voice calibration dialog")
     setShowVoiceCalibrationDialog(true)
   }
 
@@ -1330,12 +1330,11 @@ export default function EduMindAI() {
             </h1>
             <div className="flex items-center gap-4">
               {/* Voice Calibration Button */}
-              {/* Modified to remove user check for testing */}
               <Button
                 onClick={startVoiceCalibration}
                 variant="outline"
                 className={`border-orange-200 hover:bg-orange-50 ${isCalibrating ? "bg-orange-100 border-orange-300" : ""}`}
-                disabled={isCalibrating} // Remove user check for testing
+                disabled={isCalibrating}
               >
                 <Mic className="w-4 h-4 mr-2 text-orange-600" />
                 <span className={isCalibrating ? "text-orange-700" : "text-orange-600"}>
