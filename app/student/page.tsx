@@ -1504,22 +1504,22 @@ export default function EduMindAI() {
                   <div>
                     <h5 className="text-sm font-medium mb-2 text-indigo-700">Assigned Readings</h5>
                     <div className="space-y-2">
-                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs ">
+                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📚</div>
-                          <span className="text-indigo-800">Chapter 7: Screen Time and Student Wellbeing</span>
+                          <span className="text-indigo-800 hover:text-indigo-900">Chapter 7: Screen Time and Student Wellbeing</span>
                         </div>
                       </div>
-                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs ">
+                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📊</div>
-                          <span className="text-indigo-800">Research Article: Effects of Night-time Device Use on Sleep Quality</span>
+                          <span className="text-indigo-800 hover:text-indigo-900">Research Article: Effects of Night-time Device Use on Sleep Quality</span>
                         </div>
                       </div>
-                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs ">
+                      <div className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-sm transition-all duration-200">
                         <div className="flex items-center gap-2">
                           <div className="text-indigo-600">📖</div>
-                          <span className="text-indigo-800">Case Study: University Digital Detox Programs</span>
+                          <span className="text-indigo-800 hover:text-indigo-900">Case Study: University Digital Detox Programs</span>
                         </div>
                       </div>
                     </div>
