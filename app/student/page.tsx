@@ -35,6 +35,7 @@ import {
 import { useRealTimeTranscription } from "@/hooks/use-real-time-transcription"
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition"
 import { useVoiceCalibration } from "@/hooks/use-voice-calibration"
+import { educationalResources, getRecommendedResources, getResourceById } from "@/lib/resources"
 
 interface AIIntervention {
   id: string
@@ -694,6 +695,8 @@ export default function EduMindAI() {
   }
 
   const generateDepthGuidance = (): AIIntervention => {
+    const sleepResource = getResourceById("sleep-technology-research-2024")
+    
     return {
       id: Date.now().toString(),
       type: "knowledge_synthesis",
@@ -701,15 +704,14 @@ export default function EduMindAI() {
       timestamp: new Date(),
       priority: "high",
       relatedKeywords: [],
-      resources: [
-        {
-          id: "sleep-technology-research-2024",
-          title: "The Impact of Blue Light on Student Sleep Patterns",
-          type: "research",
-          url: "https://www.sleepfoundation.org/how-sleep-works/blue-light-and-sleep",
-          summary: "Research findings on how blue light from digital devices affects melatonin production and sleep quality in students",
-        },
-      ],
+      resources: sleepResource ? [{
+        id: sleepResource.id,
+        title: sleepResource.title,
+        type: sleepResource.type,
+        url: sleepResource.url,
+        content: sleepResource.content,
+        summary: sleepResource.summary,
+      }] : [],
       context: {
         triggerType: "depth_needed",
         relatedNodes: [],
@@ -734,6 +736,9 @@ export default function EduMindAI() {
 
   const generateKnowledgeSupport = (): AIIntervention => {
     const relevantConcepts = knowledgeBase.concepts.slice(-2)
+    const recentDiscussion = discussions.slice(-3).map(d => d.content).join(' ')
+    const recommendedResources = getRecommendedResources(recentDiscussion, relevantConcepts.map(c => c.name))
+    
     return {
       id: Date.now().toString(),
       type: "resource_provision",
@@ -741,22 +746,14 @@ export default function EduMindAI() {
       timestamp: new Date(),
       priority: "medium",
       relatedKeywords: relevantConcepts.map((c) => c.name),
-      resources: [
-        {
-          id: "uk-student-mental-health-2023",
-          title: "UK Student Mental Health Report (2023)",
-          type: "webpage",
-          url: "https://www.advance-he.ac.uk/knowledge-hub/student-mental-health-and-wellbeing-insight-survey-2023",
-          summary: "Comprehensive report on mental health challenges facing UK university students and digital technology impact",
-        },
-        {
-          id: "digital-wellness-guidelines-2024",
-          title: "Digital Wellness Guidelines",
-          type: "document",
-          url: "https://www.commonsensemedia.org/digital-wellness",
-          summary: "Evidence-based strategies for maintaining digital wellness and healthy technology habits",
-        },
-      ],
+      resources: recommendedResources.map(res => ({
+        id: res.id,
+        title: res.title,
+        type: res.type,
+        url: res.url,
+        content: res.content,
+        summary: res.summary,
+      })),
       context: {
         triggerType: "knowledge_gap",
         relatedNodes: [],
@@ -785,6 +782,8 @@ export default function EduMindAI() {
       (c) => !recentNodes.some((n) => n.content.includes(c.name)),
     )
 
+    const whoResource = getResourceById("who-screen-time-2023")
+
     return {
       id: Date.now().toString(),
       type: "process_guidance",
@@ -795,15 +794,14 @@ export default function EduMindAI() {
       timestamp: new Date(),
       priority: "medium",
       relatedKeywords: [],
-      resources: [
-        {
-          id: "who-screen-time-2023",
-          title: "WHO Recommendations on Screen Time",
-          type: "document",
-          url: "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
-          summary: "World Health Organization guidelines on screen time limits and healthy digital habits for students",
-        },
-      ],
+      resources: whoResource ? [{
+        id: whoResource.id,
+        title: whoResource.title,
+        type: whoResource.type,
+        url: whoResource.url,
+        content: whoResource.content,
+        summary: whoResource.summary,
+      }] : [],
       context: {
         triggerType: "silence",
         relatedNodes: recentNodes.map((n) => n.id),
@@ -1508,70 +1506,49 @@ export default function EduMindAI() {
                   <div>
                     <h5 className="text-sm font-medium mb-2 text-indigo-700">Assigned Readings</h5>
                     <div className="space-y-2">
-                      <div 
-                        className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
-                        onClick={() => window.open("https://www.who.int/news-room/fact-sheets/detail/physical-activity", "_blank")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="text-indigo-600">📚</div>
-                          <span className="text-indigo-800 hover:text-indigo-900">WHO Guidelines: Screen Time and Student Wellbeing</span>
+                      {educationalResources.slice(0, 3).map((resource) => (
+                        <div 
+                          key={resource.id}
+                          className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
+                          onClick={() => handleResourceClick({
+                            id: resource.id,
+                            title: resource.title,
+                            type: resource.type,
+                            url: resource.url,
+                            content: resource.content,
+                            summary: resource.summary,
+                          })}
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="text-indigo-600">
+                              {resource.type === 'document' ? '📚' : resource.type === 'research' ? '📊' : resource.type === 'report' ? '📖' : '🌐'}
+                            </div>
+                            <span className="text-indigo-800 hover:text-indigo-900">{resource.title}</span>
+                          </div>
                         </div>
-                      </div>
-                      <div 
-                        className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
-                        onClick={() => window.open("https://www.sleepfoundation.org/how-sleep-works/blue-light-and-sleep", "_blank")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="text-indigo-600">📊</div>
-                          <span className="text-indigo-800 hover:text-indigo-900">Research Article: Effects of Blue Light on Sleep Quality</span>
-                        </div>
-                      </div>
-                      <div 
-                        className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 hover:shadow-sm transition-all duration-200"
-                        onClick={() => window.open("https://www.advance-he.ac.uk/knowledge-hub/student-mental-health-and-wellbeing-insight-survey-2023", "_blank")}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="text-indigo-600">📖</div>
-                          <span className="text-indigo-800 hover:text-indigo-900">Case Study: UK Student Mental Health Report</span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
 
                   <div>
                     <h5 className="text-sm font-medium mb-2 text-indigo-700">AI-Suggested Resources</h5>
                     <div className="space-y-2">
-                      {[
-                        {
-                          id: "resource-1",
-                          name: "Tips to Reduce Eye Strain",
-                          definition: "Evidence-based methods for minimizing digital eye strain during extended screen use",
-                          type: "document",
-                          summary: "General advice on eye strain reduction.",
-                        },
-                        {
-                          id: "resource-2",
-                          name: "UK Student Mental Health Report (2023)",
-                          definition: "Comprehensive report on mental health challenges facing UK university students",
-                          type: "document",
-                          summary: "Latest research on student mental health trends.",
-                        },
-                        {
-                          id: "resource-3",
-                          name: "Digital Wellness Guidelines",
-                          definition: "Evidence-based strategies for maintaining digital wellness and healthy technology habits",
-                          type: "webpage",
-                          summary: "Comprehensive guide to digital wellness practices.",
-                        },
-                      ].map((resource) => (
+                      {educationalResources.slice(3, 6).map((resource) => (
                         <div
                           key={resource.id}
                           className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 transition-colors"
-                          onClick={() => handleResourceClick(resource)}
+                          onClick={() => handleResourceClick({
+                            id: resource.id,
+                            title: resource.title,
+                            type: resource.type,
+                            url: resource.url,
+                            content: resource.content,
+                            summary: resource.summary,
+                          })}
                         >
                           <div className="flex items-center gap-2">
                             <div className="text-indigo-600">🤖</div>
-                            <span className="text-indigo-800">{resource.name}</span>
+                            <span className="text-indigo-800">{resource.title}</span>
                           </div>
                         </div>
                       ))}
@@ -1862,10 +1839,10 @@ export default function EduMindAI() {
                   <TabsContent value="resources" className="mt-4 flex-1">
                     <div className="h-[calc(100vh-200px)] bg-gray-50 rounded-lg border border-slate-200 p-4">
                       {selectedResource ? (
-                        <div className="h-full">
-                          <div className="flex items-center gap-2 mb-4">
+                        <div className="h-full flex flex-col">
+                          <div className="flex items-center gap-2 mb-4 flex-shrink-0">
                             {getResourceIcon(selectedResource.type)}
-                            <h3 className="font-medium">{selectedResource.title || selectedResource.name}</h3>
+                            <h3 className="font-medium text-lg">{selectedResource.title || selectedResource.name}</h3>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -1875,31 +1852,87 @@ export default function EduMindAI() {
                               ✕
                             </Button>
                           </div>
-                          <div className="bg-white rounded border border-slate-200 p-4 h-full overflow-auto">
-                            {selectedResource.url ? (
-                              <div className="space-y-3">
-                                <p className="text-sm text-gray-600">{selectedResource.summary}</p>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => window.open(selectedResource.url, "_blank")}
-                                >
-                                  <ExternalLink className="w-4 h-4 mr-2" />
-                                  Open External Link
-                                </Button>
+                          
+                          <div className="bg-white rounded border border-slate-200 p-6 flex-1 overflow-auto">
+                            {/* Resource Header */}
+                            <div className="mb-4 pb-4 border-b border-gray-200">
+                              <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                                <span className="capitalize">{selectedResource.type}</span>
+                                {selectedResource.url && (
+                                  <>
+                                    <span>•</span>
+                                    <Button
+                                      variant="link"
+                                      size="sm"
+                                      className="p-0 h-auto text-blue-600 hover:text-blue-800"
+                                      onClick={() => window.open(selectedResource.url, "_blank")}
+                                    >
+                                      <ExternalLink className="w-3 h-3 mr-1" />
+                                      View Original
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                              <p className="text-gray-700 font-medium">{selectedResource.summary}</p>
+                            </div>
+
+                            {/* Resource Content */}
+                            {selectedResource.content ? (
+                              <div className="prose prose-sm max-w-none">
+                                <div className="text-gray-800 leading-relaxed whitespace-pre-line">
+                                  {selectedResource.content}
+                                </div>
                               </div>
                             ) : (
-                              <div className="space-y-3">
-                                <p className="text-sm font-medium text-gray-800">{selectedResource.summary}</p>
-                                <div className="text-sm text-gray-700 leading-relaxed">{selectedResource.content}</div>
+                              <div className="text-center py-8">
+                                <div className="text-gray-500 mb-4">
+                                  This resource links to external content. Click "View Original" to access the full material.
+                                </div>
+                                {selectedResource.url && (
+                                  <Button
+                                    onClick={() => window.open(selectedResource.url, "_blank")}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Open External Resource
+                                  </Button>
+                                )}
                               </div>
                             )}
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center py-8">
-                          <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600">Click on a resource from AI guidance to view it here</p>
+                        <div className="text-center py-12">
+                          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-700 mb-2">No Resource Selected</h3>
+                          <p className="text-gray-600 mb-6">Click on any resource from the sidebar or AI guidance to view its content here</p>
+                          
+                          {/* Show available resources */}
+                          <div className="max-w-md mx-auto">
+                            <h4 className="text-sm font-medium text-gray-700 mb-3">Available Resources:</h4>
+                            <div className="space-y-2">
+                              {educationalResources.slice(0, 3).map((resource) => (
+                                <div
+                                  key={resource.id}
+                                  className="text-left p-3 bg-white rounded border border-gray-200 cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all"
+                                  onClick={() => handleResourceClick({
+                                    id: resource.id,
+                                    title: resource.title,
+                                    type: resource.type,
+                                    url: resource.url,
+                                    content: resource.content,
+                                    summary: resource.summary,
+                                  })}
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {getResourceIcon(resource.type)}
+                                    <span className="font-medium text-sm text-gray-800">{resource.title}</span>
+                                  </div>
+                                  <p className="text-xs text-gray-600">{resource.summary}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
