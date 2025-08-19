@@ -1529,49 +1529,43 @@ export default function EduMindAI() {
                     <h5 className="text-sm font-medium mb-2 text-indigo-700">AI-Suggested Resources</h5>
                     <ScrollArea className="h-24">
                       <div className="space-y-2 pr-2">
-                        {knowledgeBase.concepts.length === 0 ? (
-                          <div className="text-sm text-gray-500 bg-white border border-gray-200 p-4 rounded-lg text-center">
-                            Resources will appear during discussion
-                          </div>
-                        ) : (
-                          [
-                            {
-                              id: "resource-1",
-                              name: "Tips to Reduce Eye Strain",
-                              definition: "Evidence-based methods for minimizing digital eye strain during extended screen use",
-                              type: "document",
-                              summary: "General advice on eye strain reduction.",
-                            },
-                            {
-                              id: "resource-2",
-                              name: "UK Student Mental Health Report (2023)",
-                              definition: "Comprehensive report on mental health challenges facing UK university students",
-                              type: "document",
-                              summary: "Latest research on student mental health trends.",
-                            },
-                            {
-                              id: "resource-3",
-                              name: "Digital Wellness Guidelines",
-                              definition: "Evidence-based strategies for maintaining digital wellness and healthy technology habits",
-                              type: "webpage",
-                              summary: "Comprehensive guide to digital wellness practices.",
-                            },
-                          ].map((resource) => (
-                            <div
-                              key={resource.id}
-                              className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 transition-colors"
-                              onClick={() => handleResourceClick(resource)}
-                            >
-                              <div className="flex items-start gap-2">
-                                <div className="text-indigo-600 mt-0.5">🤖</div>
-                                <div>
-                                  <span className="font-medium text-indigo-700 hover:text-indigo-800">{resource.name}</span>
-                                  <div className="text-gray-600 mt-1">{resource.definition}</div>
-                                </div>
+                        {[
+                          {
+                            id: "resource-1",
+                            name: "Tips to Reduce Eye Strain",
+                            definition: "Evidence-based methods for minimizing digital eye strain during extended screen use",
+                            type: "document",
+                            summary: "General advice on eye strain reduction.",
+                          },
+                          {
+                            id: "resource-2",
+                            name: "UK Student Mental Health Report (2023)",
+                            definition: "Comprehensive report on mental health challenges facing UK university students",
+                            type: "document",
+                            summary: "Latest research on student mental health trends.",
+                          },
+                          {
+                            id: "resource-3",
+                            name: "Digital Wellness Guidelines",
+                            definition: "Evidence-based strategies for maintaining digital wellness and healthy technology habits",
+                            type: "webpage",
+                            summary: "Comprehensive guide to digital wellness practices.",
+                          },
+                        ].map((resource) => (
+                          <div
+                            key={resource.id}
+                            className="bg-white p-2 rounded border border-indigo-100 text-xs cursor-pointer hover:bg-indigo-50 transition-colors"
+                            onClick={() => handleResourceClick(resource)}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className="text-indigo-600 mt-0.5">🤖</div>
+                              <div>
+                                <span className="font-medium text-indigo-700 hover:text-indigo-800">{resource.name}</span>
+                                <div className="text-gray-600 mt-1">{resource.definition}</div>
                               </div>
                             </div>
-                          ))
-                        )}
+                          </div>
+                        ))}
                       </div>
                     </ScrollArea>
                   </div>
