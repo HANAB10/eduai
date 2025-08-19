@@ -1346,10 +1346,10 @@ export default function EduMindAI() {
               {!isDiscussionActive ? (
                 <Button
                   onClick={startDiscussion}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg hover:scale-105 transform transition-all duration-300 hover:-translate-y-0.5 disabled:hover:scale-100 disabled:hover:translate-y-0 disabled:hover:shadow-md"
                   disabled={!voiceCalibrationComplete} // Only enable after calibration
                 >
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110" />
                   Start Discussion
                 </Button>
               ) : (
