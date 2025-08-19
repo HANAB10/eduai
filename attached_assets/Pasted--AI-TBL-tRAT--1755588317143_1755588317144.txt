@@ -1,0 +1,90 @@
+好的 ✅ 我帮你把刚才那套「健康使用手机和电脑」的假数据里的 **点名式 AI 提示** 改写成 **开放性群体提示**，这样就符合 TBL 的讨论精神，也更学术上合理。
+
+---
+
+## tRAT Discussion Question
+
+> Based on the assigned readings and your own experience, what are the three biggest challenges students face when trying to use phones and laptops without harming their health (e.g., stress, distractions, sleep problems)? Rank them in order of importance and justify your ranking with evidence and examples.
+
+---
+
+## Discussion Summary（左栏）
+
+* **Discussion Progress:** 5 contributions made
+* **Time:** 09:10
+* **Current Focus:** Prioritizing sleep disruption vs. concentration loss vs. notification stress
+* **Final Summary:** *Final summary will be generated when the tRAT discussion ends.*
+
+---
+
+## AI Guidance（中间 tab）
+
+**Edu AI – Discussion Starter**
+
+> “Welcome to today’s tRAT on healthy technology use. To start, what do you think are the biggest health-related challenges caused by using phones or laptops too much? Please share your top three and explain why, using readings or personal examples.”
+
+**Edu AI – Open Group Prompt**
+
+> “Some of you have highlighted sleep disruption as a main concern. Do others think that stress from constant notifications could be even more disruptive? Why or why not?”
+
+**Edu AI – Knowledge Synthesis**
+
+> “So far you’ve identified three recurring themes: sleep, stress from notifications, and reduced concentration. How do these interact with each other? For example, does reducing screen time automatically improve wellbeing, or is the type of use more important?”
+
+**Suggested Resources**
+
+* [WHO Recommendations on Screen Time](#)
+* [UK Student Mental Health Report (2023)](#)
+
+---
+
+## Course Resources（左下）
+
+**Assigned Readings**
+
+* Chapter 7: *Screen Time and Student Wellbeing*
+* Research Article: *Effects of Night-time Device Use on Sleep Quality*
+* Case Study: *University Digital Detox Programs*
+
+**AI-Suggested Resources** *(appear during discussion)*
+
+* “Tips to Reduce Eye Strain on Laptops”
+* “How to Manage Notifications Effectively”
+
+---
+
+## Team Dashboard（右栏）
+
+| Member | Speeches | Speaking Time |
+| ------ | -------- | ------------- |
+| test1  | 2        | 01:10         |
+| test2  | 3        | 02:05         |
+| test3  | 1        | 00:45         |
+| test4  | 2        | 01:35         |
+
+---
+
+## Quick Questions（右下）
+
+* “Is using a laptop late at night worse than using a phone in bed?”
+* “How much daily screen time becomes unhealthy for students?”
+* “Do blue-light filters actually improve sleep?”
+* “Do weekend ‘digital detox’ programs improve concentration long-term?”
+
+---
+
+## 模拟讨论片段（支撑上面的进度数）
+
+* **test1:** “Sleep disruption is the biggest issue—even one hour before bed delays sleep cycles.”
+* **test2:** “Notification stress is worse. Constant pings from WhatsApp/email fragment attention all day.”
+* **test3:** “Loss of focus during studying is critical—tab switching kills deep work.”
+* **test4:** “Concentration can be trained; chronic sleep loss and stress are harder to fix.”
+* **AI Interim Synthesis:**
+
+  > “Your group has raised sleep, stress, and concentration as top concerns. If a university could only implement one support program—like sleep workshops, notification-management tools, or study-skills training—which do you think would make the greatest difference, and why?”
+
+---
+
+🔑 修改点：所有 AI 提示都不再点名某个学生，而是**以小组为对象发问**，用 *“Some of you…” / “Do others think…” / “How do these interact…”* 这种群体化措辞。
+
+要不要我再帮你写一个 **教师端（老师看到的 summary + dashboard）版本** 的假数据？这样你可以双视角展示。

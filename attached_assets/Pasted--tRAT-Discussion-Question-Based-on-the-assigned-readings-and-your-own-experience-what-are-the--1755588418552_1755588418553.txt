@@ -1,0 +1,70 @@
+## tRAT Discussion Question
+
+> Based on the assigned readings and your own experience, what are the three biggest challenges students face when trying to use phones and laptops without harming their health (e.g., stress, distractions, sleep problems)? Rank them in order of importance and justify your ranking with evidence and examples.
+
+---
+
+## Discussion Summary（左栏）
+
+* **Discussion Progress:** 5 contributions made
+* **Time:** 09:10
+* **Current Focus:** Prioritizing sleep disruption vs. concentration loss vs. notification stress
+* **Final Summary:** *Final summary will be generated when the tRAT discussion ends.*
+
+---
+
+## AI Guidance（中间 tab）
+
+**Edu AI – Discussion Starter**
+
+> “Welcome to today’s tRAT on healthy technology use. To start, what do you think are the biggest health-related challenges caused by using phones or laptops too much? Please share your top three and explain why, using readings or personal examples.”
+
+**Edu AI – Open Group Prompt**
+
+> “Some of you have highlighted sleep disruption as a main concern. Do others think that stress from constant notifications could be even more disruptive? Why or why not?”
+
+**Edu AI – Knowledge Synthesis**
+
+> “So far you’ve identified three recurring themes: sleep, stress from notifications, and reduced concentration. How do these interact with each other? For example, does reducing screen time automatically improve wellbeing, or is the type of use more important?”
+
+**Suggested Resources**
+
+* [WHO Recommendations on Screen Time](#)
+* [UK Student Mental Health Report (2023)](#)
+
+---
+
+## Course Resources（左下）
+
+**Assigned Readings**
+
+* Chapter 7: *Screen Time and Student Wellbeing*
+* Research Article: *Effects of Night-time Device Use on Sleep Quality*
+* Case Study: *University Digital Detox Programs*
+
+**AI-Suggested Resources** *(appear during discussion)*
+
+* “Tips to Reduce Eye Strain on Laptops”
+* “How to Manage Notifications Effectively”
+
+---
+
+## Team Dashboard（右栏）
+
+| Member | Speeches | Speaking Time |
+| ------ | -------- | ------------- |
+| test1  | 2        | 01:10         |
+| test2  | 3        | 02:05         |
+| test3  | 1        | 00:45         |
+| test4  | 2        | 01:35         |
+
+---
+
+## Quick Questions（右下，带名字）
+
+* **test1:** “Is using a laptop late at night worse than using a phone in bed?”
+* **test2:** “How much daily screen time becomes unhealthy for students?”
+* **test3:** “Do blue-light filters actually improve sleep?”
+* **test4:** “Do weekend ‘digital detox’ programs improve concentration long-term?”
+
+---
