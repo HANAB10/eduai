@@ -2072,7 +2072,7 @@ export default function EduMindAI() {
                             <div className="grid grid-cols-2 gap-2 text-xs">
                               <div className="text-center p-2 bg-blue-50 rounded border border-blue-100">
                                 <div className="font-medium text-blue-600">{memberDiscussions.length}</div>
-                                <div className="text-blue-700">Speeches</div>
+                                <div className="text-blue-700">Contributions</div>
                               </div>
                               <div className="text-center p-2 bg-green-50 rounded border border-green-100">
                                 <div className="font-medium text-green-600">
