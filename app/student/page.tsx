@@ -1464,7 +1464,7 @@ export default function EduMindAI() {
                     <div className="bg-white p-3 rounded border border-yellow-100 shadow-sm">
                       <h5 className="text-xs font-medium mb-1 text-yellow-800">Current Focus</h5>
                       <p className="text-xs text-yellow-700">
-                        Prioritizing sleep disruption vs. concentration loss vs. notification stress
+                        Alice强烈支持将睡眠问题排第一位，David用研究数据支持这一观点；Marcus则认为通知焦虑影响更广泛，Sarah倾向于专注力下降是核心问题
                       </p>
                     </div>
                   </div>
