@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -369,7 +368,7 @@ export default function EducationDashboard() {
                           </div>
                         </div>
 
-                        
+
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-sm text-slate-700 px-3 py-1 rounded-md bg-slate-50 border border-slate-200">
@@ -530,7 +529,7 @@ export default function EducationDashboard() {
                       </div>
                       <div className="text-center p-4 rounded-lg bg-slate-50 border border-slate-200">
                         <div className="text-2xl font-bold text-blue-600">
-                          10
+                          13
                         </div>
                         <div className="text-xs font-medium mt-1 text-blue-600">
                           Total Contributions
@@ -558,7 +557,7 @@ export default function EducationDashboard() {
                 </CardContent>
               </Card>
 
-              
+
             </div>
           </TabsContent>
 
