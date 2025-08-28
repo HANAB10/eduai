@@ -812,29 +812,32 @@ export default function EducationDashboard() {
                   <label htmlFor="learning-materials-upload" className="cursor-pointer block w-full h-full" />
                 </Card>
 
-                {/* AI Prompt Setting */}
+                {/* Discussion Keywords Setting */}
                 <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-slate-800">
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500">
                         <Brain className="w-5 h-5 text-white" />
                       </div>
-                      Set AI Assistant Prompt
+                      Discussion Keywords Setup
                     </CardTitle>
                     <CardDescription className="text-slate-600">
-                      Configure the AI assistant that will guide student discussions
+                      Define key concepts and keywords that students should cover in their discussions
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6 space-y-4 bg-white">
                     <Textarea
-                      placeholder="Enter the prompt for the AI assistant. For example: 'You are a helpful teaching assistant that guides students through collaborative discussions. Ask probing questions, encourage participation, and help students think critically about the topic...'"
+                      placeholder="Enter the key concepts and keywords for the discussion. For example: 'digital wellness, mental health, screen time, social media impact, sleep quality, academic performance, stress management, mindfulness, technology balance, healthy habits...'"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       className="min-h-[200px] border rounded-lg focus:border-indigo-300 transition-all duration-200 border-slate-200 bg-slate-50"
                     />
+                    <div className="text-xs text-slate-500 mb-2">
+                      💡 Tip: Separate keywords with commas. The AI will guide students to explore these concepts during discussions.
+                    </div>
                     <div className="flex justify-end">
                       <Button className="text-white border-0 px-6 py-2 rounded-lg font-medium hover:bg-blue-600 transition-all duration-200 bg-blue-500">
-                        Save Prompt
+                        Save Keywords
                       </Button>
                     </div>
                   </CardContent>
