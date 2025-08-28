@@ -543,7 +543,7 @@ export default function EducationDashboard() {
                       </div>
                       <div className="text-center p-4 rounded-lg bg-slate-50 border border-slate-200">
                         <div className="text-2xl font-bold text-blue-600">
-                          {groupDetails.totalContributions}
+                          10
                         </div>
                         <div className="text-xs font-medium mt-1 text-blue-600">
                           Total Contributions
