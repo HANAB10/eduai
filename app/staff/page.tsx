@@ -116,10 +116,10 @@ const groupDetails = {
   id: 1,
   name: "Group 1",
   members: [
-    { name: "Alice Chen", speakTime: "4min 30s", contributions: 8, role: "active" },
-    { name: "Bob Wilson", speakTime: "3min 15s", contributions: 5, role: "moderate" },
-    { name: "Carol Davis", speakTime: "6min 45s", contributions: 12, role: "leader" },
-    { name: "David Kim", speakTime: "2min 20s", contributions: 3, role: "quiet" },
+    { name: "Alice Chen", speakTime: "4min 30s", contributions: 4, role: "active" },
+    { name: "Bob Wilson", speakTime: "3min 15s", contributions: 2, role: "moderate" },
+    { name: "Carol Davis", speakTime: "6min 45s", contributions: 6, role: "leader" },
+    { name: "David Kim", speakTime: "2min 20s", contributions: 1, role: "quiet" },
   ],
   summary:
     "The group is actively discussing the impact of artificial intelligence on education. Carol is leading the conversation with insightful questions, while Alice provides technical perspectives. Bob contributes practical examples, and David offers thoughtful but less frequent input.",
