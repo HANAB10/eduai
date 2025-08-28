@@ -797,37 +797,8 @@ export default function EducationDashboard() {
                     {/* Uploaded Files List */}
                     <div className="space-y-4">
                       <h4 className="font-bold text-slate-800">Uploaded Materials</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50 border-slate-200">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
-                              <FileText className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-sm font-medium text-slate-800">Course_Syllabus.pdf</span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-all duration-200"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </div>
-                        <div className="flex items-center justify-between p-4 rounded-lg border bg-slate-50 border-slate-200">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
-                              <FileText className="w-4 h-4 text-white" />
-                            </div>
-                            <span className="text-sm font-medium text-slate-800">Discussion_Guidelines.docx</span>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-lg transition-all duration-200"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </div>
+                      <div className="min-h-[100px] p-4 border-2 border-dashed rounded-lg border-slate-300 bg-slate-50 flex items-center justify-center">
+                        <p className="text-sm text-slate-500">No materials uploaded yet</p>
                       </div>
                     </div>
                   </CardContent>
