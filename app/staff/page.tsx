@@ -292,7 +292,7 @@ export default function EducationDashboard() {
             </div>
             <h1 className="text-2xl font-bold text-slate-700">Edu AI</h1>
           </div>
-          <Avatar className="ring-2 ring-offset-2 ring-slate-200">
+          <Avatar className="ring-2 ring-offset-2 ring-indigo-200">
             <AvatarFallback className="text-white font-semibold bg-indigo-600">
               T
             </AvatarFallback>
@@ -306,37 +306,22 @@ export default function EducationDashboard() {
       {/* Navigation Tabs */}
       <div className="bg-gray-50">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-6 pt-4 pb-2">
-          <TabsList className="bg-transparent border-0 h-auto p-0 gap-3">
+          <TabsList className="flex w-full justify-between border border-slate-200 bg-gray-50 rounded-md p-1">
             <TabsTrigger
               value="dashboard"
-              className="data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border data-[state=active]:border-0 rounded-lg px-4 py-2 font-medium transition-all duration-200 min-w-[120px] text-sm hover:bg-gray-100"
-              style={{
-                background: activeTab === "dashboard" ? "#4338CA" : "white",
-                borderColor: activeTab === "dashboard" ? "transparent" : "#E5E7EB",
-                border: activeTab === "dashboard" ? "none" : "1px solid #E5E7EB",
-              }}
+              className="flex-1 border border-slate-200 rounded-sm bg-white data-[state=active]:bg-blue-50 data-[state=active]:border-blue-300 px-2 py-1 text-sm mx-1"
             >
               Dashboard
             </TabsTrigger>
             <TabsTrigger
               value="group-details"
-              className="data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border data-[state=active]:border-0 rounded-lg px-4 py-2 font-medium transition-all duration-200 min-w-[120px] text-sm hover:bg-gray-100"
-              style={{
-                background: activeTab === "group-details" ? "#4338CA" : "white",
-                borderColor: activeTab === "group-details" ? "transparent" : "#E5E7EB",
-                border: activeTab === "group-details" ? "none" : "1px solid #E5E7EB",
-              }}
+              className="flex-1 border border-slate-200 rounded-sm bg-white data-[state=active]:bg-blue-50 data-[state=active]:border-blue-300 px-2 py-1 text-sm mx-1"
             >
               Group details
             </TabsTrigger>
             <TabsTrigger
               value="discussion-setting"
-              className="data-[state=active]:text-white data-[state=inactive]:bg-white data-[state=inactive]:text-gray-600 data-[state=inactive]:border data-[state=active]:border-0 rounded-lg px-4 py-2 font-medium transition-all duration-200 min-w-[140px] text-sm hover:bg-gray-100"
-              style={{
-                background: activeTab === "discussion-setting" ? "#4338CA" : "white",
-                borderColor: activeTab === "discussion-setting" ? "transparent" : "#E5E7EB",
-                border: activeTab === "discussion-setting" ? "none" : "1px solid #E5E7EB",
-              }}
+              className="flex-1 border border-slate-200 rounded-sm bg-white data-[state=active]:bg-blue-50 data-[state=active]:border-blue-300 px-2 py-1 text-sm mx-1"
             >
               Pre-class Setup
             </TabsTrigger>
@@ -356,7 +341,7 @@ export default function EducationDashboard() {
                   {groups.map((group) => (
                     <Card
                       key={group.id}
-                      className="cursor-pointer transition-all duration-300 border rounded-lg overflow-hidden hover:bg-gray-50 bg-white border-slate-200"
+                      className="cursor-pointer transition-all duration-300 border rounded-lg overflow-hidden hover:bg-blue-50 bg-white border-slate-200"
                       onClick={() => handleGroupClick(group.id)}
                     >
                       <CardHeader className="pb-3 transition-all duration-300">
@@ -365,7 +350,7 @@ export default function EducationDashboard() {
                           <Badge
                             variant={group.status === "active" ? "default" : "secondary"}
                             className={`${
-                              group.status === "active" ? "text-white border-0 bg-green-600" : "bg-gray-100 text-gray-600 border-0"
+                              group.status === "active" ? "text-white border-0 bg-indigo-600" : "bg-gray-100 text-gray-600 border-0"
                             } px-3 py-1 rounded-md font-medium`}
                           >
                             {group.status}
@@ -427,13 +412,13 @@ export default function EducationDashboard() {
               <div className="lg:col-span-1">
                 <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
                   <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-3 text-orange-600">
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-orange-500">
+                    <CardTitle className="flex items-center gap-3 text-indigo-600">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-600">
                         <AlertTriangle className="w-5 h-5 text-white" />
                       </div>
                       Real-time Alerts
                     </CardTitle>
-                    <CardDescription className="text-orange-600">Groups needing attention</CardDescription>
+                    <CardDescription className="text-indigo-600">Groups needing attention</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4 p-6 bg-white">
                     {alerts.map((alert) => (
@@ -633,7 +618,7 @@ export default function EducationDashboard() {
                           onClick={autoAssignGroups}
                           variant="outline"
                           size="sm"
-                          className="border text-slate-600 hover:bg-slate-100 hover:border-slate-300 bg-white transition-all duration-200 border-slate-200"
+                          className="border text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 bg-white transition-all duration-200 border-indigo-200"
                         >
                           <Shuffle className="w-4 h-4 mr-2" />
                           Auto Assign
