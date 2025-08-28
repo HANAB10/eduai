@@ -1440,16 +1440,16 @@ export default function EduMindAI() {
         {/* Main Layout */}
         <div className="grid grid-cols-12 gap-6">
           {/* Left Sidebar - Summary & Resources */}
-          <div className="col-span-3 space-y-6">
+          <div className="col-span-3 space-y-6 h-[calc(100vh-8rem)] flex flex-col">
             {/* Summary Section - Real-time and Final (Vertical Layout) */}
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 shadow-sm">
-              <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 shadow-sm h-[calc(50vh-3rem)]">
+              <CardHeader className="pb-3 flex-shrink-0">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Archive className="w-5 h-5 text-blue-600" />
                   Discussion Summary
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 flex-1 overflow-y-auto">
                 {/* Real-time Summary */}
                 <div>
                   <h4 className="font-medium text-sm mb-3 text-indigo-700">
@@ -1497,14 +1497,14 @@ export default function EduMindAI() {
             </Card>
 
             {/* Course Resources */}
-            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 shadow-sm">
-              <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 shadow-sm h-[calc(50vh-3rem)]">
+              <CardHeader className="pb-3 flex-shrink-0">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-indigo-600" />
                   Course Resources
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 overflow-y-auto">
                 <div className="space-y-4">
                   <div>
                     <h5 className="text-sm font-medium mb-2 text-indigo-700">Assigned Readings</h5>
@@ -1564,7 +1564,7 @@ export default function EduMindAI() {
 
           {/* Center - AI Guidance & Resources */}
           <div className="col-span-6">
-            <div className="h-full flex flex-col">
+            <div className="h-[calc(100vh-8rem)] flex flex-col">
               <div className="pb-3 flex-shrink-0">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
                   <TabsList className="flex w-full justify-between border border-slate-200 bg-gray-50 rounded-md p-1">
@@ -2032,16 +2032,16 @@ export default function EduMindAI() {
           </div>
 
           {/* Right Sidebar - Dashboard */}
-          <div className="col-span-3 space-y-6">
+          <div className="col-span-3 space-y-6 h-[calc(100vh-8rem)] flex flex-col">
             {/* Dashboard */}
-            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
-              <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 h-[calc(50vh-3rem)]">
+              <CardHeader className="pb-3 flex-shrink-0">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Users className="w-5 h-5 text-indigo-600" />
                   Team Dashboard
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 overflow-y-auto">
                 <div className="space-y-4">
                   {/* Member Participation Metrics */}
                   <div>
@@ -2091,14 +2091,14 @@ export default function EduMindAI() {
             </Card>
 
             {/* Add Questions Section */}
-            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
-              <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 h-[calc(50vh-3rem)]">
+              <CardHeader className="pb-3 flex-shrink-0">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <HelpCircle className="w-5 h-5 text-indigo-600" />
                   Quick Questions
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex-1 overflow-y-auto">
                 <div className="space-y-4">
                   {/* Display Added Questions */}
                   <div>
