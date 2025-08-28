@@ -565,9 +565,9 @@ export default function EducationDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 bg-white">
-                  <p className="text-slate-800 leading-relaxed p-4 rounded-lg bg-slate-50 border border-slate-200">
-                    {groupDetails.summary}
-                  </p>
+                  <div className="h-32 rounded-lg flex items-center justify-center border-2 border-dashed bg-slate-50 border-slate-300">
+                    <p className="text-slate-500 text-sm">AI summary will appear here after discussion analysis</p>
+                  </div>
                 </CardContent>
               </Card>
 
