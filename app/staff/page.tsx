@@ -571,25 +571,7 @@ export default function EducationDashboard() {
                 </CardContent>
               </Card>
 
-              {/* Mind Map Placeholder */}
-              <Card className="border rounded-lg overflow-hidden bg-white border-slate-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-slate-800">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-500">
-                      <TrendingUp className="w-5 h-5 text-white" />
-                    </div>
-                    Discussion Mind Map
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 bg-white">
-                  <div className="h-64 rounded-lg flex items-center justify-center border-2 border-dashed bg-slate-50 border-slate-300">
-                    <div className="text-center">
-                      <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-slate-700 font-medium">Mind map visualization would appear here</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              
             </div>
           </TabsContent>
 
