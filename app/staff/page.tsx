@@ -369,20 +369,7 @@ export default function EducationDashboard() {
                           </div>
                         </div>
 
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm font-medium text-slate-800">
-                            <span>Participation Rate</span>
-                            <span>{group.participation}%</span>
-                          </div>
-                          <div className="relative h-3 rounded-md overflow-hidden bg-slate-200">
-                            <div
-                              className="h-full transition-all duration-500 rounded-md bg-indigo-600"
-                              style={{
-                                width: `${group.participation}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
+                        
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-sm text-slate-700 px-3 py-1 rounded-md bg-slate-50 border border-slate-200">
